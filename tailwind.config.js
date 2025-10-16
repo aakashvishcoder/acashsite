@@ -4,9 +4,10 @@ module.exports = {
         extend: {
             fontFamily: {
                 orbitron: ['"Orbitron"', 'sans-serif'],
-                rajdhani: ['"Rajdhani"', 'sans-serif']
+                rajdhani: ['"Rajdhani"', 'sans-serif'],
+                tech: ['"Share Tech Mono"', 'monospace'],
             },
-        }
+        },
     },
     plugins: [],
 };
