@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import background3d from './components/Background3d';
+import Background3d from './components/Background3d';
 import './App.css';
 
 const sections = [
@@ -27,7 +27,7 @@ const Section = ({ id, children }: { id: string, children: React.ReactNode }) =>
 function App() {
   return (
     <div className="relative">
-      <background3d />
+      <Background3d />
 
       <nav className="fixed top-0 left-0 right-0 z-20 p-6 flex justify-center">
         <div className="bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 flex space-x-6">

@@ -18,7 +18,7 @@ const AnimatedBackground = () => {
     );
 };
 
-const background3d = () => {
+const Background3d = () => {
     return (
         <div className="fixed inset-0 z-0">
             <Suspense fallback={null}>
@@ -28,4 +28,4 @@ const background3d = () => {
     );
 };
 
-export default background3d;
+export default Background3d;
