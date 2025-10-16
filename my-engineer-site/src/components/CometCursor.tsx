@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
 
-const cometCursor = () => {
+const CometCursor = () => {
     const mouseX = useMotionValue(-100);
     const mouseY = useMotionValue(-100);
 
@@ -19,6 +19,12 @@ const cometCursor = () => {
         const handleMouseMove = (e: MouseEvent) => {
             mouseX.set(e.clientX);
             mouseY.set(e.clientY);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
         };
     },[mouseX, mouseY]);
 
@@ -63,4 +69,4 @@ const cometCursor = () => {
     );
 };
 
-export default cometCursor;
+export default CometCursor;
