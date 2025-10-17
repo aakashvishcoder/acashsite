@@ -1,65 +1,137 @@
 // src/components/ProjectGraph.tsx
 import { useEffect, useRef, useState } from 'react';
-import { forceSimulation, forceLink, forceManyBody, forceCenter, SimulationNodeDatum } from 'd3-force';
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  SimulationNodeDatum,
+  SimulationLinkDatum,
+} from 'd3-force';
+import 'd3-transition';
+import { drag, D3DragEvent } from 'd3-drag';
+import { select } from 'd3-selection';
 import { Project } from '../data/projects';
 import ProjectModel from './ProjectModel';
 
-interface ProjectGraphProps {
-  projects: Project[];
+// Compute links + shared tech names
+const getLinks = (projects: Project[]) => {
+  const links = [];
+  for (let i = 0; i < projects.length; i++) {
+    for (let j = i + 1; j < projects.length; j++) {
+      const shared = projects[i].tech.filter(t => projects[j].tech.includes(t));
+      if (shared.length > 0) {
+        links.push({
+          source: projects[i],
+          target: projects[j],
+          strength: shared.length,
+          sharedTech: shared,
+        });
+      }
+    }
+  }
+  return links;
+};
+
+interface LinkData {
+  source: Project;
+  target: Project;
+  strength: number;
+  sharedTech: string[];
 }
 
-const ProjectGraph = ({ projects: initialProjects }: ProjectGraphProps) => {
+const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; tech: string[] } | null>(null);
 
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const svg = svgRef.current;
-    const width = svg.clientWidth;
-    const height = svg.clientHeight;
+    const svg = select(svgRef.current);
+    const width = svgRef.current.clientWidth;
+    const height = svgRef.current.clientHeight;
 
-    // Clone projects to avoid mutating original data
     const nodes = initialProjects.map(p => ({ ...p }));
-    const links = nodes.flatMap(node =>
-      node.connections.map(targetId => ({
-        source: node.id,
-        target: targetId,
-      }))
-    );
+    const links: LinkData[] = getLinks(nodes);
 
-    // Cast to SimulationNodeDatum to satisfy D3 types
-    const simulation = forceSimulation(nodes as SimulationNodeDatum[])
-      .force('link', forceLink(links).id((d: any) => d.id).distance(150))
-      .force('charge', forceManyBody().strength(-300))
-      .force('center', forceCenter(width / 2, height / 2))
-      .on('tick', () => {
-        // Update links
-        svg.querySelectorAll('.link').forEach((link, i) => {
-          const l = links[i];
-          const source = nodes.find(n => n.id === l.source);
-          const target = nodes.find(n => n.id === l.target);
-          if (source && target && source.x !== undefined && source.y !== undefined && target.x !== undefined && target.y !== undefined) {
-            (link as SVGLineElement).setAttribute('x1', String(source.x));
-            (link as SVGLineElement).setAttribute('y1', String(source.y));
-            (link as SVGLineElement).setAttribute('x2', String(target.x));
-            (link as SVGLineElement).setAttribute('y2', String(target.y));
-          }
-        });
-
-        // Update nodes
-        svg.querySelectorAll('.node').forEach((node, i) => {
-          const n = nodes[i];
-          if (n.x !== undefined && n.y !== undefined) {
-            (node as SVGCircleElement).setAttribute('cx', String(n.x));
-            (node as SVGCircleElement).setAttribute('cy', String(n.y));
-          }
-        });
+    const dragHandler = drag<SVGCircleElement, Project>()
+      .on('start', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x ?? 0;
+        d.fy = d.y ?? 0;
+      })
+      .on('drag', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on('end', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
       });
 
-    // ✅ Correct cleanup: stop simulation on unmount
+    const simulation = forceSimulation(nodes as SimulationNodeDatum[])
+      .force('link', forceLink(links as SimulationLinkDatum<SimulationNodeDatum>[])
+        .id((d: any) => d.id)
+        .distance(d => 120 - ((d as LinkData).strength - 1) * 30)
+      )
+      .force('charge', forceManyBody().strength(-400))
+      .force('center', forceCenter(width / 2, height / 2))
+      .on('tick', () => {
+        svg.selectAll<SVGLineElement, LinkData>('.link')
+          .attr('x1', d => d.source.x!)
+          .attr('y1', d => d.source.y!)
+          .attr('x2', d => d.target.x!)
+          .attr('y2', d => d.target.y!);
+
+        svg.selectAll<SVGCircleElement, Project>('.node')
+          .attr('cx', d => d.x!)
+          .attr('cy', d => d.y!);
+      });
+
+    // Create links with animation
+    const linkElements = svg.selectAll<SVGLineElement, LinkData>('.link')
+      .data(links)
+      .enter()
+      .append('line')
+      .attr('class', 'link')
+      .attr('stroke', '#00f0ff')
+      .attr('stroke-width', d => 1 + d.strength * 0.8)
+      .attr('opacity', 0)
+      .on('mouseover', (event, d) => {
+        setTooltip({
+          x: (d.source.x! + d.target.x!) / 2,
+          y: (d.source.y! + d.target.y!) / 2,
+          tech: d.sharedTech,
+        });
+      })
+      .on('mouseout', () => setTooltip(null))
+      .transition()
+      .duration(800)
+      .delay((_, i) => i * 50)
+      .attr('opacity', d => 0.3 + d.strength * 0.2);
+
+    // Create nodes
+    const nodeElements = svg.selectAll<SVGCircleElement, Project>('.node')
+      .data(nodes)
+      .enter()
+      .append('circle')
+      .attr('class', 'node')
+      .attr('r', 14)
+      .attr('fill', '#00f0ff')
+      .attr('cursor', 'move')
+      .on('click', (event, d) => {
+        event.stopPropagation();
+        setSelectedProject(d);
+      })
+      .call(dragHandler);
+
+    // Cleanup
     return () => {
       simulation.stop();
+      svg.selectAll('*').remove();
+      setTooltip(null);
     };
   }, [initialProjects]);
 
@@ -67,31 +139,33 @@ const ProjectGraph = ({ projects: initialProjects }: ProjectGraphProps) => {
     <>
       <svg
         ref={svgRef}
-        className="w-full h-[600px] bg-transparent"
+        className="w-full h-[600px] bg-transparent cursor-grab"
         style={{ maxHeight: '80vh' }}
-      >
-        {/* Render links */}
-        {initialProjects.flatMap(p =>
-          p.connections.map((targetId) => (
-            <line
-              key={`${p.id}-${targetId}`}
-              className="link stroke-cyan-500/30"
-              strokeWidth={1.5}
-            />
-          ))
-        )}
+        onClick={() => setSelectedProject(null)}
+      />
 
-        {/* Render nodes */}
-        {initialProjects.map((project) => (
-          <circle
-            key={project.id}
-            className="node fill-cyan-500 cursor-pointer transition hover:fill-cyan-300"
-            r="12"
-            onClick={() => setSelectedProject(project)}
-          />
-        ))}
-      </svg>
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="fixed z-40 pointer-events-none bg-gray-900/80 backdrop-blur border border-cyan-500/30 rounded-lg p-3 max-w-xs"
+          style={{
+            left: tooltip.x + window.scrollX - 80,
+            top: tooltip.y + window.scrollY - 40,
+          }}
+        >
+          <p className="text-cyan-300 font-rajdhani text-sm">Shared Technologies:</p>
+          <ul className="mt-1 text-gray-200 text-xs">
+            {tooltip.tech.map((tech, i) => (
+              <li key={i} className="flex items-center">
+                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mr-2"></span>
+                {tech}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
+      {/* Modal */}
       {selectedProject && (
         <ProjectModel
           project={selectedProject}
