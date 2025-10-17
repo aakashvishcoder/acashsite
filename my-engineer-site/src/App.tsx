@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import EarthGlobe from './components/EarthGlobe';
 import CometCursor from './components/CometCursor';
+import SparkleEffect from './components/SparkleEffect';
 import './App.css';
 
 const sections = [
@@ -39,6 +40,7 @@ function App() {
   return (
     <>
       <CometCursor />
+      <SparkleEffect />
       <div className="relative">
         <EarthGlobe />
 
