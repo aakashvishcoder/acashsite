@@ -1,9 +1,13 @@
+// src/data/projects.ts
 export type Project = {
-    id: string,
-    title: string,
-    description: string,
-    tech: string[], 
-    connections: string[]; 
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  connections: string[];
+  // D3 will add these during simulation
+  x?: number;
+  y?: number;
 };
 
 export const projects: Project[] = [

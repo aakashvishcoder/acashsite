@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import EarthGlobe from './components/EarthGlobe';
 import CometCursor from './components/CometCursor';
 import SparkleEffect from './components/SparkleEffect';
+import ProjectGraph from './components/ProjectGraph';
+import { projects } from './data/projects';
 import './App.css';
 
 const sections = [
@@ -74,24 +76,16 @@ function App() {
           </Card>
         </Section>
 
-        {/* Projects */}
+
         <Section id="projects">
-          <div className="max-w-5xl mx-auto w-full">
-            <h2 className="text-3xl md:text-4xl font-orbitron mb-10 text-center text-cyan-300">Featured Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[1, 2].map((i) => (
-                <Card key={i}>
-                  <h3 className="text-xl md:text-2xl font-rajdhani text-cyan-200">ESP32 Devboard</h3>
-                  <p className="mt-3 text-gray-300 leading-relaxed">
-                    Designed using EasyEDA with custom power regulation and debug headers.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-cyan-900/40 text-cyan-300 text-xs rounded">PCB Design</span>
-                    <span className="px-2 py-1 bg-purple-900/40 text-purple-300 text-xs rounded">Embedded C</span>
-                  </div>
-                </Card>
-              ))}
-            </div>
+          <div className="max-w-6xl mx-auto w-full px-4">
+            <h2 className="text-3xl md:text-4xl font-orbitron mb-8 text-center text-cyan-300">
+              Project Network
+            </h2>
+            <p className="text-gray-300 text-center mb-8">
+              Click any node to explore project details and connections.
+            </p>
+            <ProjectGraph projects={projects} />
           </div>
         </Section>
 
