@@ -88,6 +88,11 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
         svg.selectAll<SVGCircleElement, Project>('.node')
           .attr('cx', d => d.x!)
           .attr('cy', d => d.y!);
+        
+        // Update label positions
+        svg.selectAll<SVGTextElement, Project>('.nodelabel')
+          .attr('x', d => (d.x ?? 0) + 20)
+          .attr('y', d => (d.y ?? 0) + 5);
       });
 
     // Create links with animation
@@ -127,10 +132,25 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       })
       .call(dragHandler);
 
+    // Create labels
+    const labelElements = svg.selectAll<SVGTextElement, Project>('.nodelabel')
+      .data(nodes)
+      .enter()
+      .append('text')
+      .attr('class', 'nodelabel')
+      .attr('x', d => (d.x ?? 0) + 20) // offset to right of node
+      .attr('y', d => (d.y ?? 0) + 5)
+      .attr('font-family', 'Rajdhani, sans-serif')
+      .attr('font-size', '12px')
+      .attr('fill', '#e0f7ff')
+      .attr('pointer-events', 'none') // don't block hover/click
+      .text(d => d.title);
     // Cleanup
     return () => {
       simulation.stop();
-      svg.selectAll('*').remove();
+      svg.selectAll('.link').remove();
+      svg.selectAll('.node').remove();
+      svg.selectAll('.nodelabel').remove();
       setTooltip(null);
     };
   }, [initialProjects]);
@@ -142,7 +162,26 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
         className="w-full h-[600px] bg-transparent cursor-grab"
         style={{ maxHeight: '80vh' }}
         onClick={() => setSelectedProject(null)}
-      />
+      >
+        <defs>
+          <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path
+              d="M 50 0 L 0 0 0 50"
+              fill="none"
+              stroke="rgba(0, 240, 255, 0.15)"  // brighter for testing
+              strokeWidth="1"
+            />
+          </pattern>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="url(#grid)"
+          pointerEvents="none"
+        />
+      </svg>
 
       {/* Tooltip */}
       {tooltip && (
