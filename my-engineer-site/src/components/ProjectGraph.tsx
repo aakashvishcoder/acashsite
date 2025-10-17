@@ -133,7 +133,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .call(dragHandler);
 
     // Create labels
-    const labelElements = svg.selectAll<SVGTextElement, Project>('.nodelabel')
+    const nodelabelElements = svg.selectAll<SVGTextElement, Project>('.nodelabel')
       .data(nodes)
       .enter()
       .append('text')
@@ -145,6 +145,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .attr('fill', '#e0f7ff')
       .attr('pointer-events', 'none') // don't block hover/click
       .text(d => d.title);
+
     // Cleanup
     return () => {
       simulation.stop();
