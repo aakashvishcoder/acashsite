@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 import { Project } from '../data/projects';
-import ProjectModal from './ProjectModal';
+import ProjectModel from './ProjectModel';
 
 interface ProjectGraphProps {
   projects: Project[];
@@ -90,7 +90,7 @@ const ProjectGraph = ({ projects }: ProjectGraphProps) => {
       </svg>
 
       {selectedProject && (
-        <ProjectModal
+        <ProjectModel
           project={selectedProject}
           onClose={() => setSelectedProject(null)}
         />
