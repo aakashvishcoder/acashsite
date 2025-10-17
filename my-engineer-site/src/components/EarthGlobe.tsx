@@ -48,10 +48,7 @@ const ConnectionArc = ({ start, end }: { start: THREE.Vector3; end: THREE.Vector
   return (
     <line>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[new Float32Array(points), 3]}
-        />
+        <bufferAttribute args={[new Float32Array(points), 3]} />
       </bufferGeometry>
       <lineBasicMaterial color="#ff00ff" transparent opacity={0.7} />
     </line>
@@ -59,19 +56,10 @@ const ConnectionArc = ({ start, end }: { start: THREE.Vector3; end: THREE.Vector
 };
 
 const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | null }) => {
-  const earthRef = useRef<THREE.Mesh>(null);
-  const cloudRef = useRef<THREE.Mesh>(null);
-
   const [earthTexture, cloudTexture] = useTexture([
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png',
   ]);
-
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (earthRef.current) earthRef.current.rotation.y = t * 0.01;
-    if (cloudRef.current) cloudRef.current.rotation.y = t * 0.015;
-  });
 
   const myPos = latLonToVector3(MY_LOCATION.lat, MY_LOCATION.lon, 5.05);
   const userPos = userLocation
@@ -80,12 +68,12 @@ const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | 
 
   return (
     <>
-      <mesh ref={earthRef}>
+      <mesh>
         <sphereGeometry args={[5, 64, 64]} />
         <meshPhongMaterial map={earthTexture} specular="#333" shininess={5} />
       </mesh>
 
-      <mesh ref={cloudRef} renderOrder={1}>
+      <mesh renderOrder={1}>
         <sphereGeometry args={[5.02, 64, 64]} />
         <meshPhongMaterial
           map={cloudTexture}
@@ -97,7 +85,7 @@ const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | 
 
       <Marker position={myPos} color="#00f0ff" />
       <Text position={[myPos.x, myPos.y + 0.4, myPos.z]} fontSize={0.3} color="#00f0ff" anchorX="center" anchorY="middle">
-        Aakash
+        You
       </Text>
 
       {userPos && (
@@ -113,9 +101,50 @@ const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | 
   );
 };
 
+// Helper component that lives INSIDE <Canvas>
+const AutoRotateHandler = ({ controlsRef, enabled }: { controlsRef: React.RefObject<any>; enabled: boolean }) => {
+  useFrame(({ camera, clock }) => {
+    if (enabled && controlsRef.current) {
+      const angle = clock.getElapsedTime() * 0.15;
+      const radius = 15;
+      camera.position.x = Math.sin(angle) * radius;
+      camera.position.z = Math.cos(angle) * radius;
+      camera.position.y = 2;
+      camera.lookAt(0, 0, 0);
+    }
+  });
+  return null;
+};
+
+const RotatingStars = () => {
+  const starsRef = useRef<THREE.Points>(null);
+
+  useFrame(({ clock }) => {
+    if (starsRef.current) {
+      starsRef.current.rotation.y = clock.getElapsedTime() * 0.05;
+    }
+  });
+
+  return (
+    <Stars
+      ref={starsRef}
+      radius={100}
+      depth={50}
+      count={5000}
+      factor={4}
+    />
+  );
+};
+
 const EarthGlobe = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [geolocationError, setGeolocationError] = useState(false);
+  const controlsRef = useRef<any>(null);
+  const [autoRotate, setAutoRotate] = useState(true); // Use state instead of ref for reactivity
+
+  const handleInteraction = () => {
+    setAutoRotate(false);
+  };
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -136,18 +165,24 @@ const EarthGlobe = () => {
 
   return (
     <div className="w-full h-screen fixed top-0 left-0 z-0">
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+      <Canvas camera={{ position: [0, 2, 15], fov: 60 }}>
         <ambientLight intensity={0.2} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />
-        <Stars radius={100} depth={50} count={5000} factor={4} />
+        <RotatingStars />
         <Earth userLocation={userLocation} />
+        
+        {/* ✅ Now inside Canvas */}
+        <AutoRotateHandler controlsRef={controlsRef} enabled={autoRotate} />
+        
         <OrbitControls
+          ref={controlsRef}
           enableZoom={true}
           enablePan={true}
           enableRotate={true}
           minDistance={7}
           maxDistance={30}
-          autoRotate={false}
+          onStart={handleInteraction}
+          onChange={handleInteraction}
         />
       </Canvas>
 
