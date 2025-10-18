@@ -256,26 +256,46 @@ const EarthGlobe = () => {
   const controlsRef = useRef<any>(null);
   const earthRef = useRef<THREE.Mesh>(null);
   const [autoRotate, setAutoRotate] = useState(true);
+  const watchIdRef = useRef<number | null>(null); // ← track the watcher
 
   const handleInteraction = () => {
     setAutoRotate(false);
   };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        () => setGeolocationError(true),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-      );
-    } else {
+    if (!navigator.geolocation) {
       setGeolocationError(true);
+      return;
     }
+
+    // Watch for location changes
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+        setGeolocationError(false);
+      },
+      (error) => {
+        console.warn('Geolocation error:', error);
+        setGeolocationError(true);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000, // Update every 30 seconds if no change
+      }
+    );
+
+    watchIdRef.current = watchId;
+
+    // Cleanup: stop watching on unmount
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
   }, []);
 
   return (

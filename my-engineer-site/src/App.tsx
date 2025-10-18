@@ -171,7 +171,7 @@ function App() {
               className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-full font-rajdhani font-bold transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-400/40"
             >
               <IconMessage size={20} />
-              Copy my Email!
+              Say Hello!
             </a>
 
             {/* Social Icons */}
@@ -219,8 +219,6 @@ function App() {
               >
                 <IconBrandSlack size={28} />
               </a>
-
-              {/* Linkedin */}
               <a
                 href="http://www.linkedin.com/in/aakash-vishnuvarth-426b15303"
                 target="_blank"
