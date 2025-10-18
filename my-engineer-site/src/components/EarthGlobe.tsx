@@ -1,9 +1,12 @@
 // src/components/EarthGlobe.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, useTexture, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
+const MY_LOCATION = { lat: 33.1972, lon: -96.6326 };
+
+// Convert lat/lon to 3D vector on sphere
 const latLonToVector3 = (lat: number, lon: number, radius: number = 5): THREE.Vector3 => {
   const phi = ((90 - lat) * Math.PI) / 180;
   const theta = ((lon + 180) * Math.PI) / 180;
@@ -14,18 +17,20 @@ const latLonToVector3 = (lat: number, lon: number, radius: number = 5): THREE.Ve
   );
 };
 
-const MY_LOCATION = { lat: 33.1972, lon: -96.6326 };
-
-const Marker = ({ position, color }: { position: THREE.Vector3; color: string }) => {
+const Marker = ({ getPosition, color }: { 
+  getPosition: () => THREE.Vector3; 
+  color: string;
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (meshRef.current) {
+      meshRef.current.position.copy(getPosition());
       const scale = 1 + Math.sin(clock.getElapsedTime() * 4) * 0.15;
       meshRef.current.scale.setScalar(scale);
     }
   });
   return (
-    <mesh position={position} ref={meshRef}>
+    <mesh ref={meshRef}>
       <sphereGeometry args={[0.18, 16, 16]} />
       <meshBasicMaterial color={color} />
     </mesh>
@@ -54,26 +59,88 @@ const ConnectionArc = ({ start, end }: { start: THREE.Vector3; end: THREE.Vector
     </line>
   );
 };
+const TextLabel = ({ 
+  getPosition, 
+  children, 
+  color = "white", 
+  fontSize = 0.3 
+}: { 
+  getPosition: () => THREE.Vector3; 
+  children: string; 
+  color?: string; 
+  fontSize?: number; 
+}) => {
+  const textRef = useRef<any>(null); // drei Text ref
 
-const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | null }) => {
+  useFrame(() => {
+    if (textRef.current) {
+      const pos = getPosition();
+      textRef.current.position.copy(pos);
+    }
+  });
+
+  return (
+    <Text
+      ref={textRef}
+      fontSize={fontSize}
+      color={color}
+      anchorX="center"
+      anchorY="middle"
+    >
+      {children}
+    </Text>
+  );
+};
+
+const RotatingEarth = ({ userLocation, earthRef }: { 
+  userLocation: { lat: number; lon: number } | null;
+  earthRef: React.RefObject<THREE.Mesh | null>;
+}) => {
   const [earthTexture, cloudTexture] = useTexture([
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png',
   ]);
 
-  const myPos = latLonToVector3(MY_LOCATION.lat, MY_LOCATION.lon, 5.05);
-  const userPos = userLocation
-    ? latLonToVector3(userLocation.lat, userLocation.lon, 5.05)
-    : null;
+  const cloudRef = useRef<THREE.Mesh>(null);
+  const rotationRef = useRef(0);
+
+  const myBasePos = useMemo(() => latLonToVector3(MY_LOCATION.lat, MY_LOCATION.lon, 5), []);
+  const userBasePos = useMemo(() => 
+    userLocation ? latLonToVector3(userLocation.lat, userLocation.lon, 5) : null, 
+    [userLocation]
+  );
+
+  // Store current positions in refs
+  const myPosRef = useRef<THREE.Vector3>(myBasePos.clone());
+  const userPosRef = useRef<THREE.Vector3 | null>(userBasePos?.clone() || null);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const rotation = t * 0.02;
+    rotationRef.current = rotation;
+
+    if (earthRef.current) earthRef.current.rotation.y = rotation;
+    if (cloudRef.current) cloudRef.current.rotation.y = t * 0.025;
+
+    // Update rotated positions
+    const rotate = (vec: THREE.Vector3) => {
+      const v = vec.clone();
+      v.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
+      return v.multiplyScalar(5.05 / 5);
+    };
+
+    myPosRef.current = rotate(myBasePos);
+    if (userBasePos) userPosRef.current = rotate(userBasePos);
+  });
 
   return (
     <>
-      <mesh>
+      <mesh ref={earthRef}>
         <sphereGeometry args={[5, 64, 64]} />
         <meshPhongMaterial map={earthTexture} specular="#333" shininess={5} />
       </mesh>
 
-      <mesh renderOrder={1}>
+      <mesh ref={cloudRef} renderOrder={1}>
         <sphereGeometry args={[5.02, 64, 64]} />
         <meshPhongMaterial
           map={cloudTexture}
@@ -83,48 +150,95 @@ const Earth = ({ userLocation }: { userLocation: { lat: number; lon: number } | 
         />
       </mesh>
 
-      <Marker position={myPos} color="#00f0ff" />
-      <Text position={[myPos.x, myPos.y + 0.4, myPos.z]} fontSize={0.3} color="#00f0ff" anchorX="center" anchorY="middle">
+      <Marker getPosition={() => myPosRef.current} color="#00f0ff" />
+      <TextLabel 
+        getPosition={() => new THREE.Vector3(
+          myPosRef.current.x, 
+          myPosRef.current.y + 0.4, 
+          myPosRef.current.z
+        )} 
+        color="#00f0ff"
+      >
         You
-      </Text>
+      </TextLabel>
 
-      {userPos && (
+      {userPosRef.current && (
         <>
-          <Marker position={userPos} color="#ff00ff" />
-          <Text position={[userPos.x, userPos.y + 0.4, userPos.z]} fontSize={0.3} color="#ff00ff" anchorX="center" anchorY="middle">
-            Visitor
-          </Text>
-          <ConnectionArc start={myPos} end={userPos} />
+          <Marker getPosition={() => userPosRef.current!} color="#ff00ff" />
+          <TextLabel 
+            getPosition={() => new THREE.Vector3(
+              userPosRef.current!.x,   
+              userPosRef.current!.y + 0.4, 
+              userPosRef.current!.z    
+            )} 
+            color="#ff00ff"            
+          >
+            Visitor                    
+          </TextLabel>
+          <ConnectionArc start={myPosRef.current} end={userPosRef.current} />
         </>
       )}
     </>
   );
 };
 
-// Helper component that lives INSIDE <Canvas>
-const AutoRotateHandler = ({ controlsRef, enabled }: { controlsRef: React.RefObject<any>; enabled: boolean }) => {
+const AutoCameraFraming = ({ 
+  userLocation, 
+  enabled 
+}: { 
+  userLocation: { lat: number; lon: number } | null;
+  enabled: boolean;
+}) => {
+  const myBasePos = useMemo(() => latLonToVector3(MY_LOCATION.lat, MY_LOCATION.lon, 5), []);
+  const userBasePos = useMemo(() => 
+    userLocation ? latLonToVector3(userLocation.lat, userLocation.lon, 5) : null, 
+    [userLocation]
+  );
+
   useFrame(({ camera, clock }) => {
-    if (enabled && controlsRef.current) {
-      const angle = clock.getElapsedTime() * 0.15;
-      const radius = 15;
-      camera.position.x = Math.sin(angle) * radius;
-      camera.position.z = Math.cos(angle) * radius;
-      camera.position.y = 2;
-      camera.lookAt(0, 0, 0);
-    }
+    if (!enabled) return;
+
+    const t = clock.getElapsedTime();
+    const earthRotation = t * 0.02;
+
+    // Rotate base positions
+    const rotateVec = (vec: THREE.Vector3) => {
+      const v = vec.clone();
+      v.applyAxisAngle(new THREE.Vector3(0, 1, 0), earthRotation);
+      return v;
+    };
+
+    const myPos = rotateVec(myBasePos);
+    const userPos = userBasePos ? rotateVec(userBasePos) : null;
+
+    // Midpoint between points
+    const target = userPos 
+      ? new THREE.Vector3().addVectors(myPos, userPos).multiplyScalar(0.5)
+      : myPos;
+
+    // Position camera to frame both points
+    const distance = userPos 
+      ? myPos.distanceTo(userPos) * 3 + 10 
+      : 15;
+
+    // Orbit around Y-axis while looking at target
+    const angle = earthRotation;
+    camera.position.x = target.x + Math.sin(angle) * distance;
+    camera.position.z = target.z + Math.cos(angle) * distance;
+    camera.position.y = target.y + 2;
+    camera.lookAt(target);
   });
+
   return null;
 };
 
 const RotatingStars = () => {
   const starsRef = useRef<THREE.Points>(null);
-
   useFrame(({ clock }) => {
     if (starsRef.current) {
       starsRef.current.rotation.y = clock.getElapsedTime() * 0.05;
     }
   });
-
   return (
     <Stars
       ref={starsRef}
@@ -140,7 +254,8 @@ const EarthGlobe = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [geolocationError, setGeolocationError] = useState(false);
   const controlsRef = useRef<any>(null);
-  const [autoRotate, setAutoRotate] = useState(true); // Use state instead of ref for reactivity
+  const earthRef = useRef<THREE.Mesh>(null);
+  const [autoRotate, setAutoRotate] = useState(true);
 
   const handleInteraction = () => {
     setAutoRotate(false);
@@ -169,10 +284,12 @@ const EarthGlobe = () => {
         <ambientLight intensity={0.2} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />
         <RotatingStars />
-        <Earth userLocation={userLocation} />
         
-        {/* ✅ Now inside Canvas */}
-        <AutoRotateHandler controlsRef={controlsRef} enabled={autoRotate} />
+        <RotatingEarth userLocation={userLocation} earthRef={earthRef} />
+        
+        {autoRotate && (
+          <AutoCameraFraming userLocation={userLocation} enabled={autoRotate} />
+        )}
         
         <OrbitControls
           ref={controlsRef}
