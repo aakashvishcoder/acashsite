@@ -14,18 +14,24 @@ import { select } from 'd3-selection';
 import { Project } from '../data/projects';
 import ProjectModel from './ProjectModel';
 
-// Compute links + shared tech names
+// Group color mapping
+const GROUP_COLORS: Record<string, string> = {
+  Hardware: '#ff6b6b',    // Coral
+  Firmware: '#4ecdc4',    // Teal
+  Cloud: '#45b7d1',       // Sky blue
+  // Add more as needed
+};
+
+// Connect nodes by group (not by shared tech)
 const getLinks = (projects: Project[]) => {
   const links = [];
   for (let i = 0; i < projects.length; i++) {
     for (let j = i + 1; j < projects.length; j++) {
-      const shared = projects[i].tech.filter(t => projects[j].tech.includes(t));
-      if (shared.length > 0) {
+      if (projects[i].group === projects[j].group) {
         links.push({
           source: projects[i],
           target: projects[j],
-          strength: shared.length,
-          sharedTech: shared,
+          group: projects[i].group,
         });
       }
     }
@@ -36,14 +42,13 @@ const getLinks = (projects: Project[]) => {
 interface LinkData {
   source: Project;
   target: Project;
-  strength: number;
-  sharedTech: string[];
+  group: string;
 }
 
 const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; tech: string[] } | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; group: string } | null>(null);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -74,57 +79,66 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
     const simulation = forceSimulation(nodes as SimulationNodeDatum[])
       .force('link', forceLink(links as SimulationLinkDatum<SimulationNodeDatum>[])
         .id((d: any) => d.id)
-        .distance(d => 120 - ((d as LinkData).strength - 1) * 30)
+        .distance(100)
       )
-      .force('charge', forceManyBody().strength(-400))
+      .force('charge', forceManyBody().strength(-300))
       .force('center', forceCenter(width / 2, height / 2))
       .on('tick', () => {
+        // Update links
         svg.selectAll<SVGLineElement, LinkData>('.link')
           .attr('x1', d => d.source.x!)
           .attr('y1', d => d.source.y!)
           .attr('x2', d => d.target.x!)
           .attr('y2', d => d.target.y!);
 
+        // Update nodes
         svg.selectAll<SVGCircleElement, Project>('.node')
           .attr('cx', d => d.x!)
-          .attr('cy', d => d.y!);
-        
-        // Update label positions
+          .attr('cy', d => d.y!)
+          .attr('fill', d => GROUP_COLORS[d.group] || '#00f0ff');
+
+        // Update node labels
         svg.selectAll<SVGTextElement, Project>('.nodelabel')
           .attr('x', d => (d.x ?? 0) + 20)
-          .attr('y', d => (d.y ?? 0) + 5);
+          .attr('y', d => (d.y ?? 0) + 5)
+          .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff');
+
+        // Update link (midpoint) labels
+        svg.selectAll<SVGTextElement, LinkData>('.linklabel')
+          .attr('x', d => (d.source.x! + d.target.x!) / 2)
+          .attr('y', d => (d.source.y! + d.target.y!) / 2 - 8);
       });
 
-    // Create links with animation
-    const linkElements = svg.selectAll<SVGLineElement, LinkData>('.link')
+    // Create links
+    svg.selectAll<SVGLineElement, LinkData>('.link')
       .data(links)
       .enter()
       .append('line')
       .attr('class', 'link')
-      .attr('stroke', '#00f0ff')
-      .attr('stroke-width', d => 1 + d.strength * 0.8)
+      .attr('stroke', d => GROUP_COLORS[d.group] || '#00f0ff')
+      .attr('stroke-width', 1.5)
       .attr('opacity', 0)
       .on('mouseover', (event, d) => {
         setTooltip({
           x: (d.source.x! + d.target.x!) / 2,
           y: (d.source.y! + d.target.y!) / 2,
-          tech: d.sharedTech,
+          group: d.group,
         });
       })
       .on('mouseout', () => setTooltip(null))
       .transition()
       .duration(800)
       .delay((_, i) => i * 50)
-      .attr('opacity', d => 0.3 + d.strength * 0.2);
+      .attr('opacity', 0.6);
 
     // Create nodes
-    const nodeElements = svg.selectAll<SVGCircleElement, Project>('.node')
+    svg.selectAll<SVGCircleElement, Project>('.node')
       .data(nodes)
       .enter()
       .append('circle')
       .attr('class', 'node')
       .attr('r', 14)
-      .attr('fill', '#00f0ff')
+      .attr('fill', d => GROUP_COLORS[d.group] || '#00f0ff')
       .attr('cursor', 'move')
       .on('click', (event, d) => {
         event.stopPropagation();
@@ -132,19 +146,32 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       })
       .call(dragHandler);
 
-    // Create labels
-    const nodelabelElements = svg.selectAll<SVGTextElement, Project>('.nodelabel')
+    // Create node labels
+    svg.selectAll<SVGTextElement, Project>('.nodelabel')
       .data(nodes)
       .enter()
       .append('text')
       .attr('class', 'nodelabel')
-      .attr('x', d => (d.x ?? 0) + 20) // offset to right of node
+      .attr('x', d => (d.x ?? 0) + 20)
       .attr('y', d => (d.y ?? 0) + 5)
       .attr('font-family', 'Rajdhani, sans-serif')
       .attr('font-size', '12px')
-      .attr('fill', '#e0f7ff')
-      .attr('pointer-events', 'none') // don't block hover/click
+      .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff')
+      .attr('pointer-events', 'none')
       .text(d => d.title);
+
+    // Create midpoint link labels
+    svg.selectAll<SVGTextElement, LinkData>('.linklabel')
+      .data(links)
+      .enter()
+      .append('text')
+      .attr('class', 'linklabel')
+      .attr('font-family', 'Rajdhani, sans-serif')
+      .attr('font-size', '10px')
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff')
+      .attr('pointer-events', 'none')
+      .text(d => d.group);
 
     // Cleanup
     return () => {
@@ -152,6 +179,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       svg.selectAll('.link').remove();
       svg.selectAll('.node').remove();
       svg.selectAll('.nodelabel').remove();
+      svg.selectAll('.linklabel').remove();
       setTooltip(null);
     };
   }, [initialProjects]);
@@ -169,7 +197,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
             <path
               d="M 50 0 L 0 0 0 50"
               fill="none"
-              stroke="rgba(0, 240, 255, 0.15)"  // brighter for testing
+              stroke="rgba(0, 240, 255, 0.1)"
               strokeWidth="1"
             />
           </pattern>
@@ -187,21 +215,13 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-40 pointer-events-none bg-gray-900/80 backdrop-blur border border-cyan-500/30 rounded-lg p-3 max-w-xs"
+          className="fixed z-40 pointer-events-none bg-gray-900/80 backdrop-blur border border-cyan-500/30 rounded-lg p-2 text-xs"
           style={{
-            left: tooltip.x + window.scrollX - 80,
-            top: tooltip.y + window.scrollY - 40,
+            left: tooltip.x + window.scrollX - 60,
+            top: tooltip.y + window.scrollY - 30,
           }}
         >
-          <p className="text-cyan-300 font-rajdhani text-sm">Shared Technologies:</p>
-          <ul className="mt-1 text-gray-200 text-xs">
-            {tooltip.tech.map((tech, i) => (
-              <li key={i} className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mr-2"></span>
-                {tech}
-              </li>
-            ))}
-          </ul>
+          <span className="text-cyan-300 font-rajdhani">{tooltip.group}</span>
         </div>
       )}
 
