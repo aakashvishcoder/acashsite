@@ -5,6 +5,7 @@ export type Project = {
   description: string;
   tech: string[];
   group: string; // e.g., 'Hardware', 'Firmware', 'Cloud'
+  githubUrl?: string;
   x?: number;
   y?: number;
   fx?: number | null;
@@ -18,6 +19,7 @@ export const projects: Project[] = [
     description: 'A custom ESP32 development board featuring USB-C connectivity, integrated LiPo charging, and dedicated debug headers.',
     tech: ['PCB Design', 'KiCad', 'Embedded C', 'Power Management'],
     group: 'Hardware',
+    githubUrl: 'https://github.com/aakashvishcoder/ESP32-Devboard.git',
   },
   {
     id: 'sprig',
@@ -25,6 +27,7 @@ export const projects: Project[] = [
     description: 'A JavaScript-based game inspired by Conway’s Game of Life, developed for Hack Club’s Sprig platform.',
     tech: ['Javascript', 'Games'],
     group: 'Games',
+    githubUrl:'https://github.com/aakashvishcoder/sprig',
   },
   {
     id: 'spell-forge',
@@ -32,6 +35,7 @@ export const projects: Project[] = [
     description: 'An interactive magic simulation website developed for Hack Club’s Siege hackathon.',
     tech: ['React', 'Node.js', 'Javascript', 'Games','CSS'],
     group: 'Games',
+    githubUrl: 'https://github.com/aakashvishcoder/SpellForge.git',
   },
   {
     id: 'healthcare-chatbot',
@@ -39,6 +43,7 @@ export const projects: Project[] = [
     description: 'A web-based AI chatbot powered by a pretrained large language model, developed for the Congressional App Challenge.',
     tech: ['React', 'Node.js', 'MQTT', 'Javascript', 'Python', 'Transformers','PyTorch','AI','CSS'],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/healthcare-chatbot.git',
   },
   {
     id: 'transformer',
@@ -46,6 +51,7 @@ export const projects: Project[] = [
     description: 'An ongoing project building the Transformer architecture entirely from scratch.',
     tech: ['C++','AI'],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/Transformer.git',
   },
   {
     id: 'sacrifice-the-baby',
@@ -53,6 +59,7 @@ export const projects: Project[] = [
     description: 'A 2D platformer game featuring a unique health system, created for Hack Club’s Daydream Hackathon.',
     tech: ['C#','Games',"Unity"],
     group: 'Games',
+    githubUrl: 'https://github.com/aakashvishcoder/Sacrifice-the-Babies.git',
   },
   {
     id: 'maker-dawgs-website',
@@ -60,6 +67,7 @@ export const projects: Project[] = [
     description: 'An official website designed and developed for my school’s engineering club.',
     tech: ['HTML','CSS',"Javascript"],
     group: 'Website',
+    githubUrl: 'https://github.com/aakashvishcoder/MakerDawgs-Website.git',
   },
   {
     id: 'photo-gallery',
@@ -67,6 +75,7 @@ export const projects: Project[] = [
     description: 'A dynamic gallery website that enables users to upload, manage, and organize photos seamlessly.',
     tech: ['React','Node.js',"CSS","Javascript"],
     group: 'Website',
+    githubUrl: 'https://github.com/aakashvishcoder/photo-gallery.git',
   },
   {
     id: 'dice-roller',
@@ -74,6 +83,7 @@ export const projects: Project[] = [
     description: 'A simple random dice roller built using an Arduino Uno and breadboard components.',
     tech: ['C++','Arduino'],
     group: 'Hardware',
+    githubUrl: 'https://github.com/aakashvishcoder/Dice-Roller.git',
   },
   {
     id: 'mini-focalboard',
@@ -81,6 +91,7 @@ export const projects: Project[] = [
     description: 'A lightweight recreation of a Trello-style productivity board for task management.',
     tech: ['React','Node.js',"CSS","Javascript"],
     group: 'Website',
+    githubUrl: 'https://github.com/aakashvishcoder/Mini-Focalboard.git',
   },
   {
     id: 'ai-image-generator',
@@ -88,6 +99,7 @@ export const projects: Project[] = [
     description: 'A pretrained AI image generation model paired with an intuitive web-based interface.',
     tech: ['React','Node.js',"CSS","Javascript","Python","AI"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/ai-image-generator.git',
   },
   {
     id: 'transfer-market',
@@ -95,6 +107,7 @@ export const projects: Project[] = [
     description: 'A neural network trained on professional soccer data to estimate players’ market values.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/Transfer-Market.git',
   },
   {
     id: 'dex-contract-using-solidity',
@@ -102,6 +115,7 @@ export const projects: Project[] = [
     description: 'A decentralized finance project focused on building a functional decentralized exchange (DEX) smart contract.',
     tech: ["Solidity"],
     group: 'Finance',
+    githubUrl: 'https://github.com/aakashvishcoder/DEX-Contract-using-solidity.git',
   },
   {
     id: 'pretrained-chatbot',
@@ -109,6 +123,7 @@ export const projects: Project[] = [
     description: 'An experimental project exploring the pretraining of a large language model from scratch.',
     tech: ["Python","AI","Transformers"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/Pretrained-Chatbot.git',
   },
   {
     id: 'image-to-ascii-art',
@@ -116,6 +131,7 @@ export const projects: Project[] = [
     description: 'A web application that converts uploaded images into stylized ASCII art representations.',
     tech: ['React','Node.js',"CSS","Javascript"],
     group: 'Website',
+    githubUrl: 'https://github.com/aakashvishcoder/image-to-ascii-art.git',
   },
   {
     id: 'neural-network-from-scratch',
@@ -123,6 +139,7 @@ export const projects: Project[] = [
     description: 'A fully custom neural network architecture implemented solely with NumPy.',
     tech: ["Python","AI"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/NeuralNetworkFromScratch.git',
   },
   {
     id: 'cpp-blockchain',
@@ -130,6 +147,7 @@ export const projects: Project[] = [
     description: 'A simplified blockchain implementation that mirrors core cryptocurrency ledger mechanics.',
     tech: ["C++"],
     group: 'Finance',
+    githubUrl: 'https://github.com/aakashvishcoder/cppblockchain.git',
   },
   {
     id: 'mini-sql-database',
@@ -137,6 +155,7 @@ export const projects: Project[] = [
     description: 'A C++-based database system replicating core functionalities of MySQL and PostgreSQL.',
     tech: ["C++","SQL"],
     group: 'Finance',
+    githubUrl: 'https://github.com/aakashvishcoder/MiniSQL-Database.git',
   },
   {
     id: 'deepfake-image-detector',
@@ -144,6 +163,7 @@ export const projects: Project[] = [
     description: 'A convolutional neural network designed to identify and classify deepfaked images.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/Deepfake-Image-Detector.git',
   },
   {
     id: 'time-series-forecasting',
@@ -151,6 +171,7 @@ export const projects: Project[] = [
     description: 'An LSTM/RNN model developed for predictive analysis of time-series datasets.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/TimeSeriesForecasting.git',
   },
   {
     id: 'fake-news-classifier',
@@ -158,6 +179,7 @@ export const projects: Project[] = [
     description: 'An LSTM/RNN-based neural network built to detect and classify fake news articles.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/FakeNewsClassifier.git',
   },
   {
     id: 'brain-tumor-classification-CNN',
@@ -165,6 +187,7 @@ export const projects: Project[] = [
     description: 'A convolutional neural network designed to detect and classify malignant brain tumors from imaging data.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: "https://github.com/aakashvishcoder/BrainTumorClassificationCNN.git",
   },
   {
     id: 'EMNIST-letter-predictor',
@@ -172,5 +195,6 @@ export const projects: Project[] = [
     description: 'A convolutional neural network trained on the EMNIST dataset to recognize handwritten letters.',
     tech: ["Python","AI","PyTorch"],
     group: 'AI',
+    githubUrl: 'https://github.com/aakashvishcoder/EMNIST-Letter-Predictor.git',
   },
 ];
