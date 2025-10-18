@@ -48,14 +48,6 @@ const ProjectModel = ({ project, onClose }: ProjectModelProps) => {
             ))}
           </div>
         </div>
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 bg-cyan-700 hover:bg-cyan-600 rounded-full font-rajdhani transition"
-          >
-            Back to Graph
-          </button>
-        </div>
       </motion.div>
     </motion.div>
   );

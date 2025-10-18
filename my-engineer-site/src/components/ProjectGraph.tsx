@@ -16,13 +16,12 @@ import ProjectModel from './ProjectModel';
 
 // Group color mapping
 const GROUP_COLORS: Record<string, string> = {
-  Hardware: '#ff6b6b',    // Coral
-  Firmware: '#4ecdc4',    // Teal
-  Cloud: '#45b7d1',       // Sky blue
-  // Add more as needed
+  Hardware: '#ff6b6b',    
+  AI: '#4ecdc4',    
+  Games: '#45b7d1',       
+  Website: '#ffffe0'
 };
 
-// Connect nodes by group (not by shared tech)
 const getLinks = (projects: Project[]) => {
   const links = [];
   for (let i = 0; i < projects.length; i++) {
@@ -45,6 +44,9 @@ interface LinkData {
   group: string;
 }
 
+// Clamp value between min and max
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
 const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -57,23 +59,33 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
     const width = svgRef.current.clientWidth;
     const height = svgRef.current.clientHeight;
 
+    // Define bounding box (with padding)
+    const padding = 50;
+    const bounds = {
+      xMin: padding,
+      xMax: width - padding,
+      yMin: padding,
+      yMax: height - padding,
+    };
+
     const nodes = initialProjects.map(p => ({ ...p }));
     const links: LinkData[] = getLinks(nodes);
 
     const dragHandler = drag<SVGCircleElement, Project>()
       .on('start', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x ?? 0;
-        d.fy = d.y ?? 0;
+        d.fx = clamp(d.x ?? 0, bounds.xMin, bounds.xMax);
+        d.fy = clamp(d.y ?? 0, bounds.yMin, bounds.yMax);
       })
       .on('drag', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
-        d.fx = event.x;
-        d.fy = event.y;
+        d.fx = clamp(event.x, bounds.xMin, bounds.xMax);
+        d.fy = clamp(event.y, bounds.yMin, bounds.yMax);
       })
       .on('end', (event: D3DragEvent<SVGCircleElement, Project, unknown>, d: Project) => {
         if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+        // Keep fixed position within bounds
+        if (d.fx != null) d.fx = clamp(d.fx, bounds.xMin, bounds.xMax);
+        if (d.fy != null) d.fy = clamp(d.fy, bounds.yMin, bounds.yMax);
       });
 
     const simulation = forceSimulation(nodes as SimulationNodeDatum[])
@@ -84,6 +96,12 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .force('charge', forceManyBody().strength(-300))
       .force('center', forceCenter(width / 2, height / 2))
       .on('tick', () => {
+        // Constrain nodes to bounds
+        nodes.forEach(node => {
+          if (node.x != null) node.x = clamp(node.x, bounds.xMin, bounds.xMax);
+          if (node.y != null) node.y = clamp(node.y, bounds.yMin, bounds.yMax);
+        });
+
         // Update links
         svg.selectAll<SVGLineElement, LinkData>('.link')
           .attr('x1', d => d.source.x!)
@@ -103,11 +121,23 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
           .attr('y', d => (d.y ?? 0) + 5)
           .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff');
 
-        // Update link (midpoint) labels
+        // Update link labels
         svg.selectAll<SVGTextElement, LinkData>('.linklabel')
           .attr('x', d => (d.source.x! + d.target.x!) / 2)
           .attr('y', d => (d.source.y! + d.target.y!) / 2 - 8);
       });
+
+    // Create bounding box border
+    svg.append('rect')
+      .attr('x', bounds.xMin)
+      .attr('y', bounds.yMin)
+      .attr('width', bounds.xMax - bounds.xMin)
+      .attr('height', bounds.yMax - bounds.yMin)
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(0, 240, 255, 0.3)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4,2')
+      .attr('pointer-events', 'none');
 
     // Create links
     svg.selectAll<SVGLineElement, LinkData>('.link')
@@ -180,6 +210,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       svg.selectAll('.node').remove();
       svg.selectAll('.nodelabel').remove();
       svg.selectAll('.linklabel').remove();
+      svg.selectAll('rect').remove(); // Remove bounding box
       setTooltip(null);
     };
   }, [initialProjects]);

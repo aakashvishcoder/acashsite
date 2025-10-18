@@ -159,7 +159,7 @@ const RotatingEarth = ({ userLocation, earthRef }: {
         )} 
         color="#00f0ff"
       >
-        You
+        Aakash
       </TextLabel>
 
       {userPosRef.current && (
@@ -173,7 +173,7 @@ const RotatingEarth = ({ userLocation, earthRef }: {
             )} 
             color="#ff00ff"            
           >
-            Visitor                    
+            You                    
           </TextLabel>
           <ConnectionArc start={myPosRef.current} end={userPosRef.current} />
         </>
