@@ -21,13 +21,13 @@ export const projects: Project[] = [
     tech: ['PCB Design', 'KiCad', 'Embedded C', 'Power Management'],
   },
   {
-    id: 'sensor-node',
-    title: 'Wireless Sensor Node',
-    description: 'Low-power LoRa node for environmental monitoring.',
-    tech: ['LoRa', 'Battery Optimization', 'PCB Design', 'Sensors'],
+    id: 'signal-scope',
+    title: 'Signal Scope',
+    description: 'A art based project which turns signals into vibrant art! (Made for Hackclub\'s Siege)',
+    tech: ['Python', 'React', 'Node.js'],
   },
   {
-    id: 'cloud-dashboard',
+    id: 'face-detection',
     title: 'Cloud Monitoring Dashboard',
     description: 'Real-time data visualization for sensor networks.',
     tech: ['React', 'Node.js', 'MQTT', 'TypeScript'],
