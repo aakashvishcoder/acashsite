@@ -300,6 +300,11 @@ const EarthGlobe = () => {
 
   return (
     <div className="w-full h-screen fixed top-0 left-0 z-0">
+      {/* Disclaimer */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center bg-black/50 text-cyan-300 text-xs md:text-sm px-4 py-2 rounded-xl shadow-lg backdrop-blur-md border border-cyan-500/30 animate-pulse">
+        🌍 This interactive Earth visualization uses your location (with permission)
+        to plot your position on the rotating globe.
+      </div>
       <Canvas camera={{ position: [0, 2, 15], fov: 60 }}>
         <ambientLight intensity={0.2} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />

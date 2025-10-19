@@ -197,4 +197,12 @@ export const projects: Project[] = [
     group: 'AI',
     githubUrl: 'https://github.com/aakashvishcoder/EMNIST-Letter-Predictor.git',
   },
+  {
+    id: 'signal-scope',
+    title: 'Signal Scope',
+    description: 'An interactive website that allows you to input your own music, and or your own voice, and express them as waves and signals in real time! (Made for Hackclub\'s Siege)',
+    tech: ['React','Node.js',"CSS","Typescript","Python",'Three.js'],
+    group: 'Website',
+    githubUrl: 'https://github.com/aakashvishcoder/SignalScope.git',
+  },
 ];
