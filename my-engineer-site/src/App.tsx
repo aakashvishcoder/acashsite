@@ -4,15 +4,16 @@ import EarthGlobe from './components/EarthGlobe';
 import CometCursor from './components/CometCursor';
 import SparkleEffect from './components/SparkleEffect';
 import ProjectGraph from './components/ProjectGraph';
+import Footer from './components/Footer';
 import { projects } from './data/projects';
 import { IconBrandGithub, IconBrandInstagram, IconBrandSnapchat, IconMessage, IconBrandSlack, IconBrandLinkedin } from '@tabler/icons-react';
 import './App.css';
 
 const sections = [
   { id: 'home', title: "Home" },
-  { id: 'projects', title: 'Projects' },
   { id: 'about', title: 'About' },
   { id: 'contact', title: "Contact" },
+  { id: 'projects', title: 'Projects' },
 ];
 
 const Section = ({ id, children }: { id: string; children: React.ReactNode }) => {
@@ -76,20 +77,7 @@ function App() {
             </p>
           </Card>
         </Section>
-
-
-        <Section id="projects">
-          <div className="max-w-6xl mx-auto w-full px-4">
-            <h2 className="text-3xl md:text-4xl font-orbitron mb-8 text-center text-cyan-300">
-              Project Network
-            </h2>
-            <p className="text-gray-300 text-center mb-8">
-              Click any node to explore project details and connections.
-            </p>
-            <ProjectGraph projects={projects} />
-          </div>
-        </Section>
-
+        
         {/* About */}
         <Section id="about">
           <Card className="max-w-3xl mx-auto text-center">
@@ -231,6 +219,19 @@ function App() {
             </div>
           </Card>
         </Section>
+
+        <Section id="projects">
+          <div className="max-w-6xl mx-auto w-full px-4">
+            <h2 className="text-3xl md:text-4xl font-orbitron mb-8 text-center text-cyan-300">
+              Project Network
+            </h2>
+            <p className="text-gray-300 text-center mb-8">
+              Click any node to explore project details and connections.
+            </p>
+            <ProjectGraph projects={projects} />
+          </div>
+        </Section>  
+        <Footer />
       </div>
     </>
   );
