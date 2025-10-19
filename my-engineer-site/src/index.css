@@ -16,3 +16,27 @@ body {
   color: #e0e0ff;
 }
 
+@keyframes flagWave {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(2deg) translateY(-2px);
+  }
+}
+
+.animate-flag-wave {
+  animation: flagWave 3s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+/* Subtle star twinkling */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(0.8); }
+}
+
+.animate-twinkle {
+  animation: twinkle 4s ease-in-out infinite;
+}
+ 
