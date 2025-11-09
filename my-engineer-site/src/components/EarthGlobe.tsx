@@ -311,7 +311,6 @@ const EarthGlobe = () => {
   const [userPins, setUserPins] = useState<
     { id: string; lat: number; lon: number; label: string; color: string }[]
   >([]);
-  const [justAddedPin, setJustAddedPin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
@@ -320,8 +319,6 @@ const EarthGlobe = () => {
       ...prev,
       { id: uuidv4(), lat, lon, label, color },
     ]);
-    setJustAddedPin(true);
-    setTimeout(() => setJustAddedPin(false), 300);
   };
 
   const handleDeletePin = (id: string, label: string) => {
