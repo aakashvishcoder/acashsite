@@ -1,6 +1,5 @@
-// src/components/ProjectModal.tsx
 import { motion } from 'framer-motion';
-import { IconBrandGithub } from '@tabler/icons-react'; // ✅ make sure you have this installed
+import { IconBrandGithub } from '@tabler/icons-react'; 
 import { Project } from '../data/projects';
 
 interface ProjectModelProps {
@@ -50,7 +49,6 @@ const ProjectModel = ({ project, onClose }: ProjectModelProps) => {
           </div>
         </div>
 
-        {/* GitHub Button (only if URL exists) */}
         {project.githubUrl && (
           <div className="mt-8 flex justify-end">
             <a

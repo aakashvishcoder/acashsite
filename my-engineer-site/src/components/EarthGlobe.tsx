@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, useTexture, Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -308,18 +308,12 @@ const EarthGlobe = () => {
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const sceneRef = useRef<THREE.Group>(null);
   const [pinToDelete, setPinToDelete] = useState<{ id: string; label: string } | null>(null);
-  const [autoRotate, setAutoRotate] = useState(true);
   const [userPins, setUserPins] = useState<
     { id: string; lat: number; lon: number; label: string; color: string }[]
   >([]);
   const [justAddedPin, setJustAddedPin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleInteraction = () => {
-    if (!justAddedPin) {
-      setAutoRotate(false);
-    }
-  };
 
   const handleAddPin = (label: string, color: string, lat: number, lon: number) => {
     setUserPins((prev) => [
@@ -387,8 +381,6 @@ const EarthGlobe = () => {
           enableRotate={true}
           minDistance={7}
           maxDistance={30}
-          onStart={handleInteraction}
-          onChange={handleInteraction}
         />
       </Canvas>
 
