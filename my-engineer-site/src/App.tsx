@@ -1,9 +1,8 @@
-// src/App.tsx
 import { motion } from 'framer-motion';
 import EarthGlobe from './components/EarthGlobe';
-import CometCursor from './components/CometCursor';
-import SparkleEffect from './components/SparkleEffect';
 import ProjectGraph from './components/ProjectGraph';
+import SparkleEffect from './components/SparkleEffect';
+import CometCursor from './components/CometCursor';
 import Footer from './components/Footer';
 import { projects } from './data/projects';
 import { IconBrandGithub, IconBrandInstagram, IconBrandSnapchat, IconMessage, IconBrandSlack, IconBrandLinkedin } from '@tabler/icons-react';
@@ -20,18 +19,19 @@ const Section = ({ id, children }: { id: string; children: React.ReactNode }) =>
   return (
     <motion.section
       id={id}
-      className="min-h-screen flex items-center justify-center px-4 relative z-10"
+      className="min-h-screen flex items-center justify-center px-4 relative z-10 pointer-events-none"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       viewport={{ once: true }}
     >
-      {children}
+      <div className="pointer-events-auto">
+        {children}
+      </div>
     </motion.section>
   );
 };
 
-// Reusable card component
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div
     className={`bg-gray-900/40 backdrop-blur-lg border border-cyan-500/20 rounded-2xl p-6 shadow-lg shadow-cyan-500/10 ${className}`}
@@ -43,14 +43,13 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
 function App() {
   return (
     <>
-      <CometCursor />
-      <SparkleEffect />
       <div className="relative">
+        <CometCursor />
+        <SparkleEffect />
         <EarthGlobe />
 
-        {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-20 p-6 flex justify-center">
-          <div className="bg-gray-900/30 backdrop-blur-xl rounded-full px-6 py-3 border border-cyan-500/20 shadow-lg">
+        <nav className="fixed top-0 left-0 right-0 z-20 p-6 flex justify-center pointer-events-none">
+          <div className="bg-gray-900/30 backdrop-blur-xl rounded-full px-6 py-3 border border-cyan-500/20 shadow-lg pointer-events-auto">
             {sections.map((sec) => (
               <a
                 key={sec.id}
@@ -63,7 +62,6 @@ function App() {
           </div>
         </nav>
 
-        {/* Home */}
         <Section id="home">
           <Card className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-orbitron font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
@@ -78,7 +76,6 @@ function App() {
           </Card>
         </Section>
         
-        {/* About */}
         <Section id="about">
           <Card className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-orbitron mb-6 text-cyan-300">About Me</h2>
@@ -89,11 +86,9 @@ function App() {
               right now, i’m focused on exploring how intelligent systems can live beyond the screen — in sensors, circuits, and real-world interactions.
             </p>
 
-            {/* Mini Skills Section */}
             <div className="mt-8">
               <h3 className="text-xl font-rajdhani text-cyan-200 mb-4">Core Skills</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {/* Hardware */}
                 <div className="bg-gray-800/40 border border-cyan-500/20 rounded-lg p-3">
                   <span className="text-cyan-300 font-tech text-sm">Hardware</span>
                   <div className="mt-1 flex flex-wrap justify-center gap-1">
@@ -108,7 +103,6 @@ function App() {
                   </div>
                 </div>
 
-                {/* Software */}
                 <div className="bg-gray-800/40 border border-purple-500/20 rounded-lg p-3">
                   <span className="text-purple-300 font-tech text-sm">Software</span>
                   <div className="mt-1 flex flex-wrap justify-center gap-1">
@@ -128,7 +122,6 @@ function App() {
                   </div>
                 </div>
 
-                {/* AI / Systems */}
                 <div className="bg-gray-800/40 border border-blue-500/20 rounded-lg p-3 md:col-span-1 col-span-2 mx-auto md:mx-0">
                   <span className="text-blue-300 font-tech text-sm">AI & Systems</span>
                   <div className="mt-1 flex flex-wrap justify-center gap-1">
@@ -142,18 +135,14 @@ function App() {
                     <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Pandas</span>
                   </div>
                 </div>
-
               </div>
             </div>
           </Card>
         </Section>
 
-        {/* Contact */}
         <Section id="contact">
           <Card className="max-w-md mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-orbitron mb-6 text-cyan-300">Get In Touch</h2>
-            
-            {/* Email Button */}
             <a
               href="mailto:aakashvish07@gmail.com?subject=Hello%20Aakash!&body=I%20just%20visited%20your%20portfolio%20and..."
               className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-full font-rajdhani font-bold transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-400/40"
@@ -162,66 +151,28 @@ function App() {
               Say Hello!
             </a>
 
-            {/* Social Icons */}
             <div className="mt-8 flex justify-center gap-5">
-              {/* GitHub */}
-              <a
-                href="https://github.com/aakashvishcoder"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-cyan-300 transition-colors"
-                aria-label="GitHub"
-              >
+              <a href="https://github.com/aakashvishcoder" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-cyan-300 transition-colors" aria-label="GitHub">
                 <IconBrandGithub size={28} />
               </a>
-
-              {/* Instagram */}
-              <a
-                href="https://instagram.com/the_aacash"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-pink-400 transition-colors"
-                aria-label="Instagram"
-              >
+              <a href="https://instagram.com/the_aacash" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-pink-400 transition-colors" aria-label="Instagram">
                 <IconBrandInstagram size={28} />
               </a>
-
-              {/* Snapchat */}
-              <a
-                href="https://snapchat.com/add/aakashvish07"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-yellow-400 transition-colors"
-                aria-label="Snapchat"
-              >
+              <a href="https://snapchat.com/add/aakashvish07" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-yellow-400 transition-colors" aria-label="Snapchat">
                 <IconBrandSnapchat size={28} />
               </a>
-
-              {/* Hack Club Slack */}
-              <a
-                href="https://hackclub.slack.com/team/U096ZFGQB3K"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-purple-400 transition-colors"
-                aria-label="Hack Club Slack"
-              >
+              <a href="https://hackclub.slack.com/team/U096ZFGQB3K" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-purple-400 transition-colors" aria-label="Hack Club Slack">
                 <IconBrandSlack size={28} />
               </a>
-              <a
-                href="http://www.linkedin.com/in/aakash-vishnuvarth-426b15303"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-purple-400 transition-colors"
-                aria-label="Linkedin"
-              >
+              <a href="http://www.linkedin.com/in/aakash-vishnuvarth-426b15303" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-purple-400 transition-colors" aria-label="Linkedin">
                 <IconBrandLinkedin size={28} />
               </a>
             </div>
           </Card>
         </Section>
 
-        <Section id="projects">
-          <div className="max-w-6xl mx-auto w-full px-4">
+        <section id="projects" className="relative z-10 py-12 px-4">
+          <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-3xl md:text-4xl font-orbitron mb-8 text-center text-cyan-300">
               Project Network
             </h2>
@@ -230,7 +181,8 @@ function App() {
             </p>
             <ProjectGraph projects={projects} />
           </div>
-        </Section>  
+        </section>  
+
         <Footer />
       </div>
     </>

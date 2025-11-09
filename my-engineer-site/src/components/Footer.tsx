@@ -1,10 +1,8 @@
-// src/components/Footer.tsx
 import { IconBrandGithub, IconBrandInstagram, IconBrandLinkedin } from '@tabler/icons-react';
 
 export default function Footer() {
   return (
     <footer className="relative z-10 bg-gray-900/30 backdrop-blur-xl border-t border-cyan-500/20 py-8 mt-20 overflow-hidden">
-      {/* Starfield background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(50)].map((_, i) => (
           <span
@@ -21,7 +19,6 @@ export default function Footer() {
       </div>
 
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 items-center text-center md:text-left px-6 text-gray-400 text-sm relative z-10 gap-y-4">
-        {/* Left: Hack Club Flag + Signature */}
         <div className="flex justify-center md:justify-start items-center gap-3">
           <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">
             <img
@@ -33,12 +30,10 @@ export default function Footer() {
           <span>© 2025 Aakash Vishnuvarth</span>
         </div>
 
-        {/* Center: Location */}
         <p className="font-tech text-cyan-300 text-xs md:text-sm text-center">
           📍 McKinney, Texas
         </p>
 
-        {/* Right: Socials */}
         <div className="flex justify-center md:justify-end items-center gap-4">
           <a
             href="https://github.com/aakashvishcoder"

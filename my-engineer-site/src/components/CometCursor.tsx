@@ -1,4 +1,3 @@
-// src/components/CometCursor.tsx
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
@@ -19,7 +18,6 @@ const CometCursor = () => {
 
   return (
     <>
-      {/* Main dot */}
       <motion.div
         className="fixed top-0 left-0 w-4 h-4 rounded-full bg-cyan-400 pointer-events-none z-50"
         style={{
@@ -30,7 +28,6 @@ const CometCursor = () => {
         }}
       />
 
-      {/* Trail */}
       {positions.slice(1).map((pos, i) => (
         <motion.div
           key={i}
