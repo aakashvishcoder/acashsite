@@ -1,190 +1,221 @@
-import { motion } from 'framer-motion';
-import EarthGlobe from './components/EarthGlobe';
-import ProjectGraph from './components/ProjectGraph';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import SparkleEffect from './components/SparkleEffect';
 import CometCursor from './components/CometCursor';
+import SkillsSection from './components/SkillsSection';
+import ProjectsSection from './components/ProjectsSection';
+import BootSequence from './components/BootSequence';
+import StatusBar from './components/StatusBar';
+import CommandPalette from './components/CommandPalette';
+import ProjectModel from './components/ProjectModel';
 import Footer from './components/Footer';
-import { projects } from './data/projects';
-import { IconBrandGithub, IconBrandInstagram, IconBrandSnapchat, IconMessage, IconBrandSlack, IconBrandLinkedin } from '@tabler/icons-react';
+import { Project, projects } from './data/projects';
+import { allSkills } from './data/skills';
+import {
+  IconBrandGithub, IconBrandInstagram, IconBrandSnapchat, IconMessage,
+  IconBrandSlack, IconBrandLinkedin,
+} from '@tabler/icons-react';
 import './App.css';
 
 const sections = [
-  { id: 'home', title: "Home" },
-  { id: 'about', title: 'About' },
-  { id: 'contact', title: "Contact" },
-  { id: 'projects', title: 'Projects' },
+  { id: 'home', title: 'home' },
+  { id: 'skills', title: 'skills' },
+  { id: 'projects', title: 'projects' },
+  { id: 'contact', title: 'contact' },
 ];
 
-const Section = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  return (
-    <motion.section
-      id={id}
-      className="min-h-screen flex items-center justify-center px-4 relative z-10 pointer-events-none"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: true }}
-    >
-      <div className="pointer-events-auto">
-        {children}
-      </div>
-    </motion.section>
-  );
-};
+/** The flowing gradient field behind the whole page. */
+const LiquidBackground = () => (
+  <div className="liquid" aria-hidden="true">
+    <div className="liquid-blob b1" />
+    <div className="liquid-blob b2" />
+    <div className="liquid-blob b3" />
+    <div className="liquid-blob b4" />
+    <div className="liquid-blob b5" />
+    <div className="liquid-sheen" />
+  </div>
+);
 
-const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div
-    className={`bg-gray-900/40 backdrop-blur-lg border border-cyan-500/20 rounded-2xl p-6 shadow-lg shadow-cyan-500/10 ${className}`}
-  >
-    {children}
+const Card = ({
+  title,
+  children,
+  className = '',
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div className={`term-panel fiducial ${className}`}>
+    <div className="term-bar">
+      <span className="text-phos/70">&#9679;</span>
+      <span className="truncate">{title}</span>
+      <span className="ml-auto hidden sm:block text-etch-bright normal-case tracking-normal">
+        &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+      </span>
+    </div>
+    <div className="term-body">{children}</div>
   </div>
 );
 
 function App() {
+  const [paletteProject, setPaletteProject] = useState<Project | null>(null);
+
   return (
     <>
-      <div className="relative">
-        <CometCursor />
-        <SparkleEffect />
-        <EarthGlobe />
+      <LiquidBackground />
+      <div className="crt-overlay" aria-hidden="true" />
+      <div className="crt-vignette" aria-hidden="true" />
 
-        <nav className="fixed top-0 left-0 right-0 z-20 p-6 flex justify-center pointer-events-none">
-          <div className="bg-gray-900/30 backdrop-blur-xl rounded-full px-6 py-3 border border-cyan-500/20 shadow-lg pointer-events-auto">
+      <BootSequence />
+      <CometCursor />
+      <SparkleEffect />
+      <CommandPalette onOpenProject={setPaletteProject} />
+      <StatusBar />
+
+      <div className="relative">
+        <nav className="fixed top-0 left-0 right-0 z-20 p-4 flex justify-center pointer-events-none">
+          <div className="term-panel pointer-events-auto flex items-stretch overflow-hidden">
+            <span className="hidden sm:flex items-center border-r border-etch px-3 font-tech text-[11px] uppercase tracking-[0.18em] text-phos-dim">
+              tty0
+            </span>
             {sections.map((sec) => (
               <a
                 key={sec.id}
                 href={`#${sec.id}`}
-                className="font-rajdhani font-medium text-gray-200 hover:text-cyan-300 transition-colors px-4 first:pl-0 last:pr-0"
+                className="group px-4 py-2.5 font-mono text-sm text-[#8fa89a] hover:text-phos hover:bg-phos/5 transition-colors border-r border-etch last:border-r-0"
               >
-                {sec.title}
+                <span className="text-etch-bright group-hover:text-phos-dim">[</span>
+                <span className="px-1">{sec.title}</span>
+                <span className="text-etch-bright group-hover:text-phos-dim">]</span>
               </a>
             ))}
           </div>
         </nav>
 
-        <Section id="home">
-          <Card className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-orbitron font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
-              Aakash Vishnuvarth
+        {/* ── HOME ─────────────────────────────────────────── */}
+        <motion.section
+          id="home"
+          className="min-h-screen flex items-center justify-center px-4 relative z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
+          <Card title="aakash@mckinney: ~" className="max-w-3xl w-full text-left">
+            <p className="font-mono text-xs text-phos-dim prompt mb-4">whoami</p>
+
+            <h1 className="font-display text-6xl md:text-8xl leading-none text-phos glow">
+              aakash_vishnuvarth
             </h1>
-            <p className="mt-4 text-lg md:text-xl font-rajdhani text-gray-300">
-              Aspiring Electrical and Computer Engineering Major
-            </p>
-            <p className="mt-2 text-cyan-300 font-tech text-sm">
-              📍 McKinney, Texas
-            </p>
+
+            <div className="rule my-5" />
+
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 font-mono text-sm">
+              <dt className="text-phos-dim">ROLE</dt>
+              <dd className="text-[#c3d6cb]">aspiring electrical &amp; computer engineering major</dd>
+
+              <dt className="text-phos-dim">LOC</dt>
+              <dd className="text-[#c3d6cb]">
+                McKinney, Texas &nbsp;
+                <span className="text-etch-bright">33.1976&deg;N 96.6153&deg;W</span>
+              </dd>
+
+              <dt className="text-phos-dim">STAT</dt>
+              <dd className="text-amber glow-amber">
+                <span className="inline-block w-1.5 h-1.5 bg-amber rounded-full mr-2 align-middle animate-blip" />
+                online &mdash; building
+              </dd>
+            </dl>
+
+            <div className="rule my-5" />
+
+            <div className="space-y-1.5 font-mono text-sm leading-relaxed text-[#b8ccc0]">
+              <p><span className="text-phos-dim select-none">&gt; </span>i design pcbs, write firmware, and build ai-driven apps that connect the physical and digital.</p>
+              <p><span className="text-phos-dim select-none">&gt; </span>i mostly work in javascript, python, and c++, and i love projects that challenge both hardware and software limits.</p>
+              <p><span className="text-phos-dim select-none">&gt; </span>right now, i&rsquo;m focused on exploring how intelligent systems can live beyond the screen &mdash; in sensors, circuits, and real-world interactions.</p>
+            </div>
+
+            {/* quick counters */}
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              {[
+                { k: 'builds', v: projects.length },
+                { k: 'parts', v: allSkills.length },
+                { k: 'domains', v: 3 },
+              ].map((s) => (
+                <div key={s.k} className="border border-etch bg-board-700/50 rounded-term px-3 py-2">
+                  <div className="font-display text-3xl leading-none text-phos glow tabular-nums">
+                    {s.v}
+                  </div>
+                  <div className="font-tech text-[10px] uppercase tracking-[0.18em] text-phos-dim mt-1">
+                    {s.k}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-6 font-mono text-xs text-phos-dim prompt caret" />
           </Card>
-        </Section>
-        
-        <Section id="about">
-          <Card className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-orbitron mb-6 text-cyan-300">About Me</h2>
-            <p className="text-lg leading-relaxed text-gray-200">
-              hey, i’m Aakash Vishnuvarth 👋<br />
-              i design pcbs, write firmware, and build ai-driven apps that connect the physical and digital.<br />
-              i mostly work in javascript, python, and c++, and i love projects that challenge both hardware and software limits.<br />
-              right now, i’m focused on exploring how intelligent systems can live beyond the screen — in sensors, circuits, and real-world interactions.
+        </motion.section>
+
+        <SkillsSection />
+        <ProjectsSection />
+
+        {/* ── CONTACT ──────────────────────────────────────── */}
+        <section id="contact" className="relative z-10 py-20 px-4 flex justify-center">
+          <Card title="./contact --interactive" className="max-w-md w-full text-left">
+            <h2 className="font-display text-4xl md:text-5xl text-phos glow leading-none">
+              {'// get in touch'}
+            </h2>
+
+            <div className="rule my-4" />
+
+            <p className="font-mono text-xs text-phos-dim mb-5 prompt">
+              open mailto:aakashvish07@gmail.com
             </p>
 
-            <div className="mt-8">
-              <h3 className="text-xl font-rajdhani text-cyan-200 mb-4">Core Skills</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div className="bg-gray-800/40 border border-cyan-500/20 rounded-lg p-3">
-                  <span className="text-cyan-300 font-tech text-sm">Hardware</span>
-                  <div className="mt-1 flex flex-wrap justify-center gap-1">
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">PCB Design</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">ESP32</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">RaspberryPI</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">Arduino</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">Embedded C</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">KiCad</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">EasyEDA</span>
-                    <span className="px-2 py-0.5 bg-cyan-900/30 text-cyan-200 text-xs rounded">Fusion360</span>
-                  </div>
-                </div>
+            <a
+              href="mailto:aakashvish07@gmail.com?subject=Hello%20Aakash!&body=I%20just%20visited%20your%20portfolio%20and..."
+              className="key w-full"
+            >
+              <IconMessage size={18} />
+              say hello
+            </a>
 
-                <div className="bg-gray-800/40 border border-purple-500/20 rounded-lg p-3">
-                  <span className="text-purple-300 font-tech text-sm">Software</span>
-                  <div className="mt-1 flex flex-wrap justify-center gap-1">
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">JavaScript</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">TypeScript</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">React</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">Node.js</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">HTML</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">CSS</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">C++</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">C#</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">Python</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">SQL</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">Solidity</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">Java</span>
-                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-200 text-xs rounded">Unity</span>
-                  </div>
-                </div>
+            <div className="rule my-6" />
 
-                <div className="bg-gray-800/40 border border-blue-500/20 rounded-lg p-3 md:col-span-1 col-span-2 mx-auto md:mx-0">
-                  <span className="text-blue-300 font-tech text-sm">AI & Systems</span>
-                  <div className="mt-1 flex flex-wrap justify-center gap-1">
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">PyTorch</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Transformers</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Machine Learning</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Deep Learning</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">TensorFlow</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Scikit-learn</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Matplotlib</span>
-                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-200 text-xs rounded">Pandas</span>
-                  </div>
-                </div>
+            <div className="flex justify-between items-center gap-3">
+              <span className="font-tech text-[10px] uppercase tracking-[0.2em] text-etch-bright">
+                links
+              </span>
+              <div className="flex items-center gap-4">
+                <a href="https://github.com/aakashvishcoder" target="_blank" rel="noopener noreferrer" className="text-[#7d938a] hover:text-phos transition-colors" aria-label="GitHub">
+                  <IconBrandGithub size={22} />
+                </a>
+                <a href="https://instagram.com/the_aacash" target="_blank" rel="noopener noreferrer" className="text-[#7d938a] hover:text-fault transition-colors" aria-label="Instagram">
+                  <IconBrandInstagram size={22} />
+                </a>
+                <a href="https://snapchat.com/add/aakashvish07" target="_blank" rel="noopener noreferrer" className="text-[#7d938a] hover:text-amber transition-colors" aria-label="Snapchat">
+                  <IconBrandSnapchat size={22} />
+                </a>
+                <a href="https://hackclub.slack.com/team/U096ZFGQB3K" target="_blank" rel="noopener noreferrer" className="text-[#7d938a] hover:text-copper transition-colors" aria-label="Hack Club Slack">
+                  <IconBrandSlack size={22} />
+                </a>
+                <a href="http://www.linkedin.com/in/aakash-vishnuvarth-426b15303" target="_blank" rel="noopener noreferrer" className="text-[#7d938a] hover:text-probe transition-colors" aria-label="Linkedin">
+                  <IconBrandLinkedin size={22} />
+                </a>
               </div>
             </div>
           </Card>
-        </Section>
-
-        <Section id="contact">
-          <Card className="max-w-md mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-orbitron mb-6 text-cyan-300">Get In Touch</h2>
-            <a
-              href="mailto:aakashvish07@gmail.com?subject=Hello%20Aakash!&body=I%20just%20visited%20your%20portfolio%20and..."
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-full font-rajdhani font-bold transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-400/40"
-            >
-              <IconMessage size={20} />
-              Say Hello!
-            </a>
-
-            <div className="mt-8 flex justify-center gap-5">
-              <a href="https://github.com/aakashvishcoder" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-cyan-300 transition-colors" aria-label="GitHub">
-                <IconBrandGithub size={28} />
-              </a>
-              <a href="https://instagram.com/the_aacash" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-pink-400 transition-colors" aria-label="Instagram">
-                <IconBrandInstagram size={28} />
-              </a>
-              <a href="https://snapchat.com/add/aakashvish07" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-yellow-400 transition-colors" aria-label="Snapchat">
-                <IconBrandSnapchat size={28} />
-              </a>
-              <a href="https://hackclub.slack.com/team/U096ZFGQB3K" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-purple-400 transition-colors" aria-label="Hack Club Slack">
-                <IconBrandSlack size={28} />
-              </a>
-              <a href="http://www.linkedin.com/in/aakash-vishnuvarth-426b15303" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-purple-400 transition-colors" aria-label="Linkedin">
-                <IconBrandLinkedin size={28} />
-              </a>
-            </div>
-          </Card>
-        </Section>
-
-        <section id="projects" className="relative z-10 py-12 px-4">
-          <div className="max-w-6xl mx-auto w-full">
-            <h2 className="text-3xl md:text-4xl font-orbitron mb-8 text-center text-cyan-300">
-              Project Network
-            </h2>
-            <p className="text-gray-300 text-center mb-8">
-              Click any node to explore project details and connections.
-            </p>
-            <ProjectGraph projects={projects} />
-          </div>
-        </section>  
+        </section>
 
         <Footer />
       </div>
+
+      {/* Palette-launched project detail lives at the root */}
+      <AnimatePresence>
+        {paletteProject && (
+          <ProjectModel project={paletteProject} onClose={() => setPaletteProject(null)} />
+        )}
+      </AnimatePresence>
     </>
   );
 }

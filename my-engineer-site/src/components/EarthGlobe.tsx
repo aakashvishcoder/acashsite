@@ -159,14 +159,14 @@ const RotatingEarth = ({
         />
       </mesh>
 
-      <Marker getPosition={() => myPosRef.current} color="#00f0ff" />
+      <Marker getPosition={() => myPosRef.current} color="#4dff9f" />
       <TextLabel 
         getPosition={() => new THREE.Vector3(
           myPosRef.current.x, 
           myPosRef.current.y + 0.4, 
           myPosRef.current.z
         )} 
-        color="#00f0ff"
+        color="#4dff9f"
       >
         Aakash
       </TextLabel>
@@ -206,7 +206,7 @@ const PinFormModal = ({
   onAddPin: (label: string, color: string, lat: number, lon: number) => void;
 }) => {
   const [label, setLabel] = useState('My Place');
-  const [color, setColor] = useState('#ff5733');
+  const [color, setColor] = useState('#ffb454');
   const [lat, setLat] = useState<string>('0');
   const [lon, setLon] = useState<string>('0');
 
@@ -233,65 +233,66 @@ const PinFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-cyan-500/30 rounded-xl w-full max-w-md p-6 shadow-2xl">
-        <h3 className="text-xl font-bold text-cyan-300 mb-4">📍 Add a Custom Pin</h3>
+    <div className="fixed inset-0 bg-board-900/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="term-panel fiducial w-full max-w-md p-6">
+        <h3 className="font-display text-3xl text-phos glow leading-none mb-1">new_pin</h3>
+        <p className="font-mono text-xs text-phos-dim prompt mb-4">insert --lat --lon</p>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-300 text-sm mb-1">Label</label>
+            <label className="block font-tech text-[10px] uppercase tracking-[0.2em] text-phos-dim mb-1.5">Label</label>
             <input
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full bg-board-900 border border-etch rounded-term px-3 py-2 font-mono text-sm text-phos placeholder:text-etch-bright focus:outline-none focus:border-phos-dim focus:shadow-glow-sm transition"
               placeholder="e.g., Home, Paris ✈️"
               autoFocus
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-300 text-sm mb-1">Latitude (°)</label>
+            <label className="block font-tech text-[10px] uppercase tracking-[0.2em] text-phos-dim mb-1.5">Latitude (°)</label>
             <input
               type="text"
               value={lat}
               onChange={(e) => setLat(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full bg-board-900 border border-etch rounded-term px-3 py-2 font-mono text-sm text-phos placeholder:text-etch-bright focus:outline-none focus:border-phos-dim focus:shadow-glow-sm transition"
               placeholder="e.g., 33.1972"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-300 text-sm mb-1">Longitude (°)</label>
+            <label className="block font-tech text-[10px] uppercase tracking-[0.2em] text-phos-dim mb-1.5">Longitude (°)</label>
             <input
               type="text"
               value={lon}
               onChange={(e) => setLon(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full bg-board-900 border border-etch rounded-term px-3 py-2 font-mono text-sm text-phos placeholder:text-etch-bright focus:outline-none focus:border-phos-dim focus:shadow-glow-sm transition"
               placeholder="e.g., -96.6326"
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-300 text-sm mb-1">Color</label>
+            <label className="block font-tech text-[10px] uppercase tracking-[0.2em] text-phos-dim mb-1.5">Color</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="w-10 h-10 cursor-pointer rounded border border-gray-600"
+                className="w-10 h-10 cursor-pointer rounded-term border border-etch bg-board-900"
               />
-              <span className="text-gray-400 text-sm">{color}</span>
+              <span className="font-mono text-xs text-phos-dim uppercase">{color}</span>
             </div>
           </div>
           <div className="flex gap-3">
             <button
               type="submit"
-              className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded font-medium transition"
+              className="key flex-1"
             >
               Add Pin
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded font-medium transition"
+              className="flex-1 border border-etch bg-board-700 hover:bg-board-600 hover:border-etch-bright text-[#8fa89a] py-2 px-4 rounded-term font-mono text-sm tracking-wider transition"
             >
               Cancel
             </button>
@@ -327,8 +328,11 @@ const EarthGlobe = () => {
 
   return (
     <div className="w-full h-screen fixed top-0 left-0 z-0 pointer-events-auto">
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center bg-black/50 text-cyan-300 text-xs md:text-sm px-4 py-2 rounded-xl shadow-lg backdrop-blur-md border border-cyan-500/30">
-        🌍 Click the globe to add a pin • Right-click pins to delete
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 term-panel px-4 py-2 font-tech text-[11px] md:text-xs uppercase tracking-[0.16em] text-phos-dim">
+        <span className="inline-block w-1.5 h-1.5 bg-phos rounded-full mr-2 align-middle animate-blip" />
+        click globe &rarr; drop pin
+        <span className="mx-2 text-etch-bright">|</span>
+        right-click pin &rarr; erase
       </div>
       <Canvas
         camera={{ position: [0, 2, 15], fov: 60 }}
@@ -388,11 +392,13 @@ const EarthGlobe = () => {
       />
 
       {pinToDelete && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-red-500/30 rounded-xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-red-400 mb-2">⚠️ Delete Pin?</h3>
-            <p className="text-gray-300 mb-4">
-              Are you sure you want to delete "<span className="text-cyan-300">{pinToDelete.label}</span>"?
+        <div className="fixed inset-0 bg-board-900/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="term-panel fiducial w-full max-w-sm p-6" style={{ borderColor: '#5c2b28' }}>
+            <h3 className="font-display text-3xl text-fault leading-none mb-1">confirm</h3>
+            <p className="font-mono text-xs text-fault/70 prompt mb-4">rm ./pins/{pinToDelete.label}</p>
+            <p className="font-mono text-sm text-[#b8ccc0] mb-5">
+              <span className="text-phos-dim select-none">&gt; </span>
+              this will erase "<span className="text-phos">{pinToDelete.label}</span>" permanently.
             </p>
             <div className="flex gap-3">
               <button
@@ -400,13 +406,13 @@ const EarthGlobe = () => {
                   setUserPins(pins => pins.filter(p => p.id !== pinToDelete.id));
                   setPinToDelete(null);
                 }}
-                className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded font-medium transition"
+                className="flex-1 border border-fault/60 bg-fault/10 hover:bg-fault/20 hover:border-fault text-fault py-2 px-4 rounded-term font-mono text-sm tracking-wider transition"
               >
                 Delete
               </button>
               <button
                 onClick={() => setPinToDelete(null)}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded font-medium transition"
+                className="flex-1 border border-etch bg-board-700 hover:bg-board-600 hover:border-etch-bright text-[#8fa89a] py-2 px-4 rounded-term font-mono text-sm tracking-wider transition"
               >
                 Cancel
               </button>

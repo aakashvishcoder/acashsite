@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "acashsite",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "my-engineer-site", "start"],
+      "port": 3000
+    }
+  ]
+}

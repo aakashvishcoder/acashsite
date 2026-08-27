@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { IconBrandGithub } from '@tabler/icons-react'; 
+import { IconBrandGithub } from '@tabler/icons-react';
 import { Project } from '../data/projects';
 
 interface ProjectModelProps {
@@ -13,55 +13,78 @@ const ProjectModel = ({ project, onClose }: ProjectModelProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-board-900/85 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.97, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gray-900/80 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-6 max-w-2xl w-full text-gray-100"
+        exit={{ scale: 0.97, opacity: 0 }}
+        className="term-panel fiducial max-w-2xl w-full text-left"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start">
-          <h2 className="text-2xl font-orbitron text-cyan-300">{project.title}</h2>
+        {/* window chrome */}
+        <div className="term-bar">
+          <span className="text-phos/70">&#9679;</span>
+          <span className="truncate">less ./projects/{project.title}</span>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl"
+            className="ml-auto px-1.5 -mr-1 text-etch-bright hover:text-fault transition-colors text-sm leading-none"
+            aria-label="Close"
           >
-            ✕
+            [x]
           </button>
         </div>
-        <p className="mt-4 text-gray-300 leading-relaxed">
-          {project.description}
-        </p>
-        <div className="mt-6">
-          <h3 className="font-rajdhani text-cyan-200 mb-2">Technologies</h3>
-          <div className="flex flex-wrap gap-2">
-            {project.tech.map((tech, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 bg-cyan-900/40 text-cyan-300 text-sm rounded-full"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
 
-        {project.githubUrl && (
-          <div className="mt-8 flex justify-end">
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-cyan-300 transition-colors"
-            >
-              <IconBrandGithub size={18} />
-              View Code
-            </a>
+        <div className="term-body">
+          <h2 className="font-display text-4xl md:text-5xl text-phos glow leading-none">
+            {project.title}
+          </h2>
+
+          <div className="rule my-4" />
+
+          <p className="font-mono text-sm leading-relaxed text-[#b8ccc0]">
+            <span className="text-phos-dim select-none">&gt; </span>
+            {project.description}
+          </p>
+
+          <div className="mt-6">
+            <div className="flex items-baseline gap-2 mb-2">
+              <h3 className="font-tech text-xs uppercase tracking-[0.22em] text-phos">
+                dependencies
+              </h3>
+              <span className="font-tech text-[10px] text-etch-bright">
+                {project.tech.length} linked
+              </span>
+            </div>
+            <div className="rule mb-3" />
+            <div className="flex flex-wrap gap-1.5">
+              {project.tech.map((tech, i) => (
+                <span key={i} className="chip">{tech}</span>
+              ))}
+            </div>
           </div>
-        )}
+
+          {project.githubUrl && (
+            <>
+              <div className="rule my-6" />
+              <div className="flex justify-between items-center gap-3">
+                <span className="font-tech text-[10px] uppercase tracking-[0.2em] text-etch-bright">
+                  source
+                </span>
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="key"
+                >
+                  <IconBrandGithub size={16} />
+                  git clone
+                </a>
+              </div>
+            </>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );

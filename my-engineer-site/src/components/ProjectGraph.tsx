@@ -13,10 +13,10 @@ import { Project } from '../data/projects';
 import ProjectModel from './ProjectModel';
 
 const GROUP_COLORS: Record<string, string> = {
-  Hardware: '#ff6b6b',    
-  AI: '#4ecdc4',    
-  Games: '#45b7d1',       
-  Website: '#ffffe0'
+  Hardware: '#ffb454',    
+  AI: '#4dff9f',    
+  Games: '#57c7ff',       
+  Website: '#c87137'
 };
 
 const getLinks = (projects: Project[]) => {
@@ -106,14 +106,14 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
           .attr('cx', d => d.x!)
           .attr('cy', d => d.y!)
           .attr('r', nodeRadius)
-          .attr('fill', d => GROUP_COLORS[d.group] || '#00f0ff');
+          .attr('fill', d => GROUP_COLORS[d.group] || '#4dff9f');
 
         svg.selectAll<SVGTextElement, Project>('.nodelabel')
           .attr('x', d => (d.x ?? 0) + nodeRadius + 5) 
           .attr('y', d => (d.y ?? 0) + 5)
-          .attr('font-family', 'Rajdhani, sans-serif')
+          .attr('font-family', 'JetBrains Mono, Share Tech Mono, monospace')
           .attr('font-size', `${Math.max(10, Math.min(16, width / 80))}px`) 
-          .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff');
+          .attr('fill', d => GROUP_COLORS[d.group] || '#9fb5a8');
 
         svg.selectAll<SVGTextElement, LinkData>('.linklabel')
           .attr('x', d => (d.source.x! + d.target.x!) / 2)
@@ -129,7 +129,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .attr('width', bounds.xMax - bounds.xMin)
       .attr('height', bounds.yMax - bounds.yMin)
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(0, 240, 255, 0.3)')
+      .attr('stroke', 'rgba(77, 255, 159, 0.28)')
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,2')
       .attr('pointer-events', 'none');
@@ -139,7 +139,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .enter()
       .append('line')
       .attr('class', 'link')
-      .attr('stroke', d => GROUP_COLORS[d.group] || '#00f0ff')
+      .attr('stroke', d => GROUP_COLORS[d.group] || '#4dff9f')
       .attr('stroke-width', 1.5)
       .attr('opacity', 0)
       .on('mouseover', (event, d) => {
@@ -161,7 +161,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .append('circle')
       .attr('class', 'node')
       .attr('r', nodeRadius) 
-      .attr('fill', d => GROUP_COLORS[d.group] || '#00f0ff')
+      .attr('fill', d => GROUP_COLORS[d.group] || '#4dff9f')
       .attr('cursor', 'move')
       .on('click', (event, d) => {
         event.stopPropagation();
@@ -176,9 +176,9 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .attr('class', 'nodelabel')
       .attr('x', d => (d.x ?? 0) + nodeRadius + 5) 
       .attr('y', d => (d.y ?? 0) + 5)
-      .attr('font-family', 'Rajdhani, sans-serif')
+      .attr('font-family', 'JetBrains Mono, Share Tech Mono, monospace')
       .attr('font-size', `${Math.max(10, Math.min(16, width / 80))}px`)
-      .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff')
+      .attr('fill', d => GROUP_COLORS[d.group] || '#9fb5a8')
       .attr('pointer-events', 'none')
       .text(d => d.title);
 
@@ -187,10 +187,10 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
       .enter()
       .append('text')
       .attr('class', 'linklabel')
-      .attr('font-family', 'Rajdhani, sans-serif')
+      .attr('font-family', 'JetBrains Mono, Share Tech Mono, monospace')
       .attr('font-size', `${Math.max(8, Math.min(12, width / 100))}px`)
       .attr('text-anchor', 'middle')
-      .attr('fill', d => GROUP_COLORS[d.group] || '#e0f7ff')
+      .attr('fill', d => GROUP_COLORS[d.group] || '#9fb5a8')
       .attr('pointer-events', 'none')
       .text(d => d.group);
 
@@ -203,17 +203,29 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
 
   return (
     <>
-      <div 
-        className="w-full mx-auto" 
-        style={{ 
-          height: '600px', 
-          maxWidth: '1200px',
-          maxHeight: '80vh'
-        }}
+      <div
+        className="term-panel fiducial w-full mx-auto overflow-hidden"
+        style={{ maxWidth: '1200px' }}
       >
+        <div className="term-bar">
+          <span className="text-phos/70">&#9679;</span>
+          <span>scope --trace project.net</span>
+          <span className="ml-auto flex items-center gap-3 normal-case tracking-normal">
+            {Object.entries(GROUP_COLORS).map(([group, color]) => (
+              <span key={group} className="hidden md:flex items-center gap-1.5 text-[10px]">
+                <span
+                  className="inline-block w-2 h-2"
+                  style={{ backgroundColor: color }}
+                />
+                {group}
+              </span>
+            ))}
+          </span>
+        </div>
         <svg
           ref={svgRef}
-          className="w-full h-full bg-transparent cursor-grab"
+          className="w-full bg-transparent cursor-crosshair"
+          style={{ height: '600px', maxHeight: '80vh' }}
           onClick={() => setSelectedProject(null)}
         >
           <defs>
@@ -221,7 +233,7 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
               <path
                 d="M 50 0 L 0 0 0 50"
                 fill="none"
-                stroke="rgba(0, 240, 255, 0.1)"
+                stroke="rgba(45, 92, 71, 0.30)"
                 strokeWidth="1"
               />
             </pattern>
@@ -239,13 +251,15 @@ const ProjectGraph = ({ projects: initialProjects }: { projects: Project[] }) =>
 
       {tooltip && (
         <div
-          className="fixed z-40 pointer-events-none bg-gray-900/80 backdrop-blur border border-cyan-500/30 rounded-lg p-2 text-xs"
+          className="fixed z-40 pointer-events-none border border-etch bg-board-800/95 rounded-term px-2 py-1"
           style={{
             left: tooltip.x + window.scrollX - 60,
             top: tooltip.y + window.scrollY - 30,
           }}
         >
-          <span className="text-cyan-300 font-rajdhani">{tooltip.group}</span>
+          <span className="font-tech text-[10px] uppercase tracking-[0.18em] text-phos">
+            {tooltip.group}
+          </span>
         </div>
       )}
 

@@ -1,9 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Share+Tech+Mono&family=VT323&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ───────────────────────────────────────────────────────────
+   00 · BASE — the enclosure
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  --board: #050807;
+  --etch: #1d2e26;
+  --phos: #4dff9f;
+  --amber: #ffb454;
+  --grid: rgba(45, 92, 71, 0.16);
+  --trace: rgba(77, 255, 159, 0.05);
+}
 
 html {
   scroll-behavior: smooth;
@@ -12,31 +24,361 @@ html {
 body {
   margin: 0;
   overflow-x: hidden;
-  background-color: #0f0f15;
-  color: #e0e0ff;
+  background-color: var(--board);
+  color: #9fb5a8;
+  font-family: 'JetBrains Mono', 'Share Tech Mono', ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+
+::selection {
+  background: rgba(77, 255, 159, 0.28);
+  color: #dffff0;
+}
+
+/* Etched scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #080d0b; border-left: 1px solid var(--etch); }
+::-webkit-scrollbar-thumb { background: #1d2e26; border: 1px solid #2c4638; }
+::-webkit-scrollbar-thumb:hover { background: #2c4638; }
+
+/* ───────────────────────────────────────────────────────────
+   01 · SUBSTRATE — PCB grid + copper traces, painted behind
+        every layer of the app (EarthGlobe's canvas is alpha).
+   ─────────────────────────────────────────────────────────── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    /* fine 8px hatch */
+    linear-gradient(var(--trace) 1px, transparent 1px),
+    linear-gradient(90deg, var(--trace) 1px, transparent 1px),
+    /* 96px silkscreen grid */
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    /* corner vignette so the board edges fall into shadow */
+    radial-gradient(ellipse 90% 70% at 50% 45%, rgba(20, 60, 42, 0.16), transparent 70%);
+  background-size: 8px 8px, 8px 8px, 96px 96px, 96px 96px, 100% 100%;
+}
+
+/* ───────────────────────────────────────────────────────────
+   01b · LIQUID — slow convecting gradient field, read through
+         the PCB grid so the board looks lit from behind.
+         Paint order: body bg → .liquid (-2) → grid (-1) → content
+   ─────────────────────────────────────────────────────────── */
+
+.liquid {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, #06120d 0%, transparent 60%),
+    #050807;
+}
+
+.liquid-blob {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  filter: blur(90px);
+  mix-blend-mode: screen;
+  will-change: transform, border-radius;
+}
+
+/* Each blob gets its own hue, path and period so the field never
+   visibly loops. Sizes are in vmax so it scales with the viewport. */
+.liquid-blob.b1 {
+  top: -20%; left: -10%;
+  background: radial-gradient(circle at 35% 35%, rgba(29, 168, 105, 0.55), transparent 65%);
+  animation: drift-a 34s ease-in-out infinite, morph 19s ease-in-out infinite;
+}
+.liquid-blob.b2 {
+  top: 10%; right: -20%;
+  background: radial-gradient(circle at 60% 40%, rgba(24, 96, 156, 0.5), transparent 65%);
+  animation: drift-b 41s ease-in-out infinite, morph 23s ease-in-out infinite reverse;
+}
+.liquid-blob.b3 {
+  bottom: -25%; left: 15%;
+  background: radial-gradient(circle at 50% 50%, rgba(140, 76, 30, 0.42), transparent 65%);
+  animation: drift-c 47s ease-in-out infinite, morph 27s ease-in-out infinite;
+}
+.liquid-blob.b4 {
+  top: 35%; left: 30%;
+  width: 42vmax; height: 42vmax;
+  background: radial-gradient(circle at 45% 55%, rgba(46, 196, 128, 0.34), transparent 62%);
+  animation: drift-d 29s ease-in-out infinite, morph 21s ease-in-out infinite reverse;
+}
+.liquid-blob.b5 {
+  bottom: 5%; right: 5%;
+  width: 38vmax; height: 38vmax;
+  background: radial-gradient(circle at 55% 45%, rgba(88, 52, 140, 0.36), transparent 62%);
+  animation: drift-e 37s ease-in-out infinite, morph 25s ease-in-out infinite;
+}
+
+/* A single specular sheen sliding over the field — the "wet" cue */
+.liquid-sheen {
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    115deg,
+    transparent 38%,
+    rgba(77, 255, 159, 0.05) 47%,
+    rgba(160, 255, 210, 0.08) 50%,
+    rgba(77, 255, 159, 0.05) 53%,
+    transparent 62%
+  );
+  animation: sheen 17s ease-in-out infinite;
+}
+
+@keyframes drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(18vw, 9vh) scale(1.22); }
+  66%      { transform: translate(6vw, 22vh) scale(0.88); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  40%      { transform: translate(-22vw, 14vh) scale(0.85); }
+  70%      { transform: translate(-8vw, -10vh) scale(1.18); }
+}
+@keyframes drift-c {
+  0%, 100% { transform: translate(0, 0) scale(0.95); }
+  45%      { transform: translate(20vw, -16vh) scale(1.2); }
+  75%      { transform: translate(-10vw, -6vh) scale(1.02); }
+}
+@keyframes drift-d {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-16vw, 18vh) scale(1.3); }
+}
+@keyframes drift-e {
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  35%      { transform: translate(-14vw, -12vh) scale(0.9); }
+  70%      { transform: translate(8vw, -20vh) scale(1.15); }
+}
+@keyframes morph {
+  0%, 100% { border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%; }
+  25%      { border-radius: 62% 38% 34% 66% / 56% 63% 37% 44%; }
+  50%      { border-radius: 35% 65% 55% 45% / 38% 52% 48% 62%; }
+  75%      { border-radius: 55% 45% 42% 58% / 60% 35% 65% 40%; }
+}
+@keyframes sheen {
+  0%, 100% { transform: translateX(-18%); opacity: 0.5; }
+  50%      { transform: translateX(18%); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-blob, .liquid-sheen { animation: none !important; }
+}
+
+/* ───────────────────────────────────────────────────────────
+   02 · CRT — scanlines, aperture mask, drifting refresh bar
+   ─────────────────────────────────────────────────────────── */
+
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.16) 0px,
+      rgba(0, 0, 0, 0.16) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 0, 60, 0.028) 0px,
+      rgba(0, 255, 120, 0.022) 1px,
+      rgba(0, 90, 255, 0.028) 2px,
+      transparent 3px
+    );
+  mix-blend-mode: overlay;
+}
+
+.crt-overlay::after {
+  content: '';
+  position: absolute;
+  inset: -50% 0;
+  height: 60px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(77, 255, 159, 0.045),
+    transparent
+  );
+  animation: scan 7s linear infinite;
+}
+
+/* Screen-edge falloff — the glass is curved */
+.crt-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 160px rgba(0, 0, 0, 0.85),
+    inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-overlay::after { animation: none; opacity: 0; }
+  html { scroll-behavior: auto; }
+}
+
+/* ───────────────────────────────────────────────────────────
+   03 · COMPONENTS — terminal chrome
+   ─────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* A panel is a window: hard 1px rule, no blur pillow, faint inner rail */
+  .term-panel {
+    @apply relative border border-etch bg-board-800/85 rounded-term;
+    box-shadow: 0 0 0 1px rgba(5, 8, 7, 0.9), 0 18px 44px -26px rgba(0, 0, 0, 0.95),
+      inset 0 1px 0 rgba(77, 255, 159, 0.05);
+    backdrop-filter: blur(3px);
+  }
+
+  /* Title bar: [ label ] ─────────────── ● ● ● */
+  .term-bar {
+    @apply flex items-center gap-2 border-b border-etch bg-board-700/80 px-3 py-1.5
+           font-tech text-[11px] uppercase tracking-[0.18em] text-phos-dim;
+  }
+
+  .term-body { @apply p-5 md:p-6; }
+
+  /* Corner registration marks — the fiducials on a board */
+  .fiducial::before,
+  .fiducial::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-color: rgba(77, 255, 159, 0.4);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .fiducial::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  .fiducial::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+  /* Shell prompt */
+  .prompt::before {
+    content: '$ ';
+    color: var(--phos);
+    opacity: 0.75;
+  }
+
+  .caret::after {
+    content: '\2588';
+    @apply ml-0.5 text-phos animate-blink;
+  }
+
+  /* Phosphor bloom on emissive text */
+  .glow { text-shadow: 0 0 10px rgba(77, 255, 159, 0.45), 0 0 2px rgba(77, 255, 159, 0.6); }
+  .glow-amber { text-shadow: 0 0 10px rgba(255, 180, 84, 0.4); }
+
+  /* Component-value chip — like a silkscreen part label */
+  .chip {
+    @apply inline-flex items-center border border-etch bg-board-600/70 px-2 py-[2px]
+           font-tech text-[11px] tracking-wide text-phos-dim rounded-term
+           transition-colors duration-150;
+  }
+  .chip:hover { @apply border-phos-dim text-phos bg-board-500; }
+
+  /* Primary key — a physical switch that travels on press */
+  .key {
+    @apply inline-flex items-center justify-center gap-2 border border-phos-dim
+           bg-phos/10 px-6 py-2.5 font-mono text-sm tracking-wider text-phos rounded-term
+           transition-all duration-150;
+    box-shadow: 0 2px 0 0 #14352a, 0 0 14px -4px rgba(77, 255, 159, 0.5);
+  }
+  .key:hover {
+    @apply bg-phos/20 border-phos;
+    box-shadow: 0 2px 0 0 #14352a, 0 0 22px -2px rgba(77, 255, 159, 0.7);
+  }
+  .key:active { transform: translateY(2px); box-shadow: 0 0 0 0 #14352a; }
+
+  /* Ruled divider with a copper trace feel */
+  .rule {
+    @apply h-px w-full border-0;
+    background: linear-gradient(90deg, transparent, #2c4638 12%, #2c4638 88%, transparent);
+  }
+}
+
+/* ───────────────────────────────────────────────────────────
+   04 · MOTION
+   ─────────────────────────────────────────────────────────── */
 
 @keyframes flagWave {
-  0%, 100% {
-    transform: rotate(0deg) translateY(0px);
-  }
-  50% {
-    transform: rotate(2deg) translateY(-2px);
-  }
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(2deg) translateY(-2px); }
 }
+.animate-flag-wave { animation: flagWave 3s ease-in-out infinite; transform-origin: left center; }
 
-.animate-flag-wave {
-  animation: flagWave 3s ease-in-out infinite;
-  transform-origin: left center;
-}
-
-/* Subtle star twinkling */
+/* legacy name kept — now reads as an idle status LED, not a star */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 0.2; transform: scale(0.8); }
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50% { opacity: 0.85; transform: scale(1); }
+}
+.animate-twinkle { animation: twinkle 4s ease-in-out infinite; }
+
+/* ───────────────────────────────────────────────────────────
+   05 · CAROUSEL + CARDS
+   ─────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
-.animate-twinkle {
-  animation: twinkle 4s ease-in-out infinite;
+@layer components {
+  /* Horizontal rail. Snap keeps cards aligned when flung or arrowed. */
+  .rail {
+    @apply flex gap-3 overflow-x-auto no-scrollbar
+           snap-x snap-mandatory scroll-smooth px-4 py-4;
+    overscroll-behavior-x: contain;
+  }
+  .rail > * { @apply snap-start shrink-0; }
+  .rail.dragging { @apply cursor-grabbing select-none; scroll-behavior: auto; }
+  .rail.dragging > * { pointer-events: none; }
+
+  /* A card in a rail — reads as a socketed module on the board */
+  .tcard {
+    @apply relative flex flex-col border border-etch bg-board-800/80 rounded-term
+           text-left transition-all duration-200 backdrop-blur-sm;
+    box-shadow: inset 0 1px 0 rgba(77, 255, 159, 0.05);
+  }
+  .tcard:hover {
+    @apply border-phos-dim bg-board-700/85 -translate-y-0.5;
+    box-shadow: inset 0 1px 0 rgba(77, 255, 159, 0.1), 0 12px 28px -18px rgba(0, 0, 0, 0.9);
+  }
+  .tcard:focus-visible {
+    @apply outline-none border-phos;
+    box-shadow: 0 0 0 1px rgba(77, 255, 159, 0.5), 0 0 18px -6px rgba(77, 255, 159, 0.6);
+  }
+
+  /* Small square nudge button in a title bar */
+  .navbtn {
+    @apply flex items-center justify-center w-6 h-6 border border-etch bg-board-700
+           text-phos-dim rounded-term transition-colors;
+  }
+  .navbtn:hover:not(:disabled) { @apply border-phos-dim text-phos bg-board-600; }
+  .navbtn:disabled { @apply opacity-25 cursor-not-allowed; }
+
+  /* Filter / view-mode toggle */
+  .tab {
+    @apply px-3 py-1 border border-etch bg-board-700/60 rounded-term
+           font-tech text-[11px] uppercase tracking-[0.16em] text-[#7d938a]
+           transition-colors whitespace-nowrap;
+  }
+  .tab:hover { @apply border-phos-dim text-phos; }
+  .tab[data-active='true'] { @apply border-phos-dim bg-phos/10 text-phos; }
 }
- 
